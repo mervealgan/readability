@@ -70,9 +70,9 @@ unostentatious 5
 """
 
 fallback_cache = {}
-fallback_subsyl = ["cial", "tia", "cius", "cious", "gui", "ion", "iou",
+_fallback_subsyl = ["cial", "tia", "cius", "cious", "gui", "ion", "iou",
 		"sia$", ".ely$"]
-fallback_addsyl = ["ia", "riet", "dien", "iu", "io", "ii",
+_fallback_addsyl = ["ia", "riet", "dien", "iu", "io", "ii",
 		"[aeiouy]bl$", "mbl$",
 		"[aeiou]{3}",
 		"^mc", "ism$",
@@ -81,8 +81,8 @@ fallback_addsyl = ["ia", "riet", "dien", "iu", "io", "ii",
 		"^coad.", "^coag.", "^coal.", "^coax.",
 		"(.)(?!\\1)[gq]ua(.)(?!\\2)[aeiou]",
 		"dnt$"]
-fallback_subsyl = [re.compile(a) for a in fallback_subsyl]
-fallback_addsyl = [re.compile(a) for a in fallback_addsyl]
+fallback_subsyl = [re.compile(a) for a in _fallback_subsyl]
+fallback_addsyl = [re.compile(a) for a in _fallback_addsyl]
 
 def _normalize_word(word):
 	return word.strip().lower()
@@ -94,12 +94,6 @@ for line in specialSyllables_en.splitlines():
 		toks = line.split()
 		assert len(toks) == 2
 		fallback_cache[_normalize_word(toks[0])] = int(toks[1])
-
-
-def count(word, lang):
-	if lang == 'en':
-		return count_en(word)
-	raise ValueError('language not available: %s' % lang)
 
 
 def count_en(word):
@@ -137,3 +131,9 @@ def count_en(word):
 	fallback_cache[word] = result
 
 	return result
+
+
+COUNT = dict(
+		en=count_en,
+		# ...
+		)

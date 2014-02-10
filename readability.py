@@ -9,33 +9,63 @@ one sentence per line, tokens space-separated.
   -L, --lang=<x>   set language for syllabification (default: en)."""
 from __future__ import division, print_function
 import io
+import re
 import sys
 import math
 import getopt
 import collections
 import syllables
 
+PUNCT = re.compile('[.,:;\'"!?]')
+
+
 class Readability:
 	def __init__(self, text, lang='en'):
-		"""Text has one sentence per line, with space separated tokens."""
-		self.words = text.split()
-		char_count = get_char_count(self.words)
-		syllable_count = count_syllables(self.words, lang)
-		word_count = len(self.words)
-		sentences = text.splitlines()
-		complexwords_count = count_complex_words(self.words, sentences, lang)
-		sentence_count = len(sentences)
-		avg_words_p_sentence = word_count / sentence_count
+		"""text has one sentence per line, with space separated tokens."""
+		self.tokens = text.split()
+		characters = 0
+		words = 0
+		syllable_count = 0
+		complex_words = 0
+		long_words = 0
+		syllcount = syllables.COUNT[lang]
+
+		for word in self.tokens:
+			if PUNCT.match(word):
+				continue
+			words += 1
+			if word == "'s":
+				characters += 2
+			else:
+				characters += sum(1 for char in word
+						if char.isdigit() or char.isalpha() or char == '-')
+				syll = syllcount(word)
+				syllable_count += syll
+				if len(word) >= 7:
+					long_words += 1
+
+				# This method must be enhanced. At the moment it only considers
+				# the number of syllables in a word. This often results in that
+				# too many complex words are detected.
+				if syll >= 3:
+					if not word[0].isupper():
+						complex_words += 1
+
+		paragraph_count = text.count('\n\n')
+		sentence_count = text.count('\n') - paragraph_count
 
 		self.stats = collections.OrderedDict([
-				('char_cnt', (char_count)),
-				('word_cnt', (word_count)),
-				('avg_char_p_word', (char_count / word_count)),
-				('syllable_cnt', (syllable_count)),
-				('avg_syll_p_word', (syllable_count / word_count)),
-				('complex_word_cnt', (complexwords_count)),
-				('sentence_cnt', (sentence_count)),
-				('avg_words_p_sentence', (avg_words_p_sentence)),
+				('chars', characters),
+				('words', words),
+				('avg_chars_per_word', characters / words),
+				('syllables', syllable_count),
+				('avg_syll_per_word', syllable_count / words),
+				('complex_words', complex_words),
+				('long_words', long_words),
+				('sentences', sentence_count),
+				('avg_words_per_sent', words / sentence_count),
+				('paragraphs', paragraph_count),
+				('sent_per_paragraph', sentence_count / paragraph_count),
 			])
 		self.readability = collections.OrderedDict([
 				('FleschKincaidGradeLevel', self.FleschKincaidGradeLevel()),
@@ -49,93 +79,39 @@ class Readability:
 			])
 
 	def ARI(self):
-		return 4.71 * (self.stats['char_cnt'] / self.stats['word_cnt']
-				) + 0.5 * (self.stats['word_cnt']
-				/ self.stats['sentence_cnt']) - 21.43
+		return 4.71 * (self.stats['chars'] / self.stats['words']
+				) + 0.5 * (self.stats['words']
+				/ self.stats['sentences']) - 21.43
 		
 	def FleschReadingEase(self):
-		return 206.835 - (1.015 * (self.stats['avg_words_p_sentence'])
-				) - (84.6 * (self.stats['syllable_cnt'] /
-					self.stats['word_cnt']))
+		return 206.835 - (1.015 * (self.stats['avg_words_per_sent'])
+				) - (84.6 * (self.stats['syllables'] /
+					self.stats['words']))
 		
 	def FleschKincaidGradeLevel(self):
-		return 0.39 * (self.stats['avg_words_p_sentence']) + 11.8 * (
-				self.stats['syllable_cnt']/ self.stats['word_cnt']) - 15.59
+		return 0.39 * (self.stats['avg_words_per_sent']) + 11.8 * (
+				self.stats['syllables']/ self.stats['words']) - 15.59
 		
 	def GunningFogIndex(self):
-		return 0.4 * ((self.stats['avg_words_p_sentence']) + (100 * (
-				self.stats['complex_word_cnt']/self.stats['word_cnt'])))
+		return 0.4 * ((self.stats['avg_words_per_sent']) + (100 * (
+				self.stats['complex_words']/self.stats['words'])))
 
 	def SMOGIndex(self):
-		return (math.sqrt(self.stats['complex_word_cnt']
-				* (30 / self.stats['sentence_cnt'])) + 3)
+		return (math.sqrt(self.stats['complex_words']
+				* (30 / self.stats['sentences'])) + 3)
 
 	def ColemanLiauIndex(self):
-		return (5.89 * (self.stats['char_cnt'] / self.stats['word_cnt'])
-				) - (30 * (self.stats['sentence_cnt'] /
-					self.stats['word_cnt'])) - 15.8
+		return (5.89 * (self.stats['chars'] / self.stats['words'])
+				) - (30 * (self.stats['sentences'] /
+					self.stats['words'])) - 15.8
 
 	def LIX(self):
-		longwords = 0.0
-		for word in self.words:
-			if len(word) >= 7:
-				longwords += 1.0
-		return self.stats['word_cnt'] / self.stats['sentence_cnt'] + (
-				100 * longwords) / self.stats['word_cnt']
+		return self.stats['words'] / self.stats['sentences'] + (
+				100 * self.stats['long_words']) / self.stats['words']
 
 	def RIX(self):
-		longwords = 0.0
-		for word in self.words:
-			if len(word) >= 7:
-				longwords += 1.0
-		return longwords / self.stats['sentence_cnt']
+		return self.stats['long_words'] / self.stats['sentences']
 		
-
-def get_char_count(words):
-	characters = 0
-	for word in words:
-		if word == "'s":
-			characters += 2
-		else:
-			characters += sum(1 for char in word
-					if char.isdigit() or char.isalpha() or char == '-')
-	return characters
-	
-def count_syllables(words, lang):
-	syllableCount = 0
-	for word in words:
-		syllableCount += syllables.count(word, lang)
-	return syllableCount
-
-#This method must be enhanced. At the moment it only
-#considers the number of syllables in a word.
-#This often results in that too many complex words are detected.
-def count_complex_words(words, sentences, lang):
-	complex_words = 0
-	found = False
-	cur_word = []
-	
-	for word in words:
-		cur_word.append(word)
-		if count_syllables(cur_word, lang) >= 3:
-			
-			#Checking proper nouns. If a word starts with a capital letter
-			#and is NOT at the beginning of a sentence we don't add it
-			#as a complex word.
-			if not(word[0].isupper()):
-				complex_words += 1
-			else:
-				for sentence in sentences:
-					if str(sentence).startswith(word):
-						found = True
-						break
-				if found:
-					complex_words += 1
-					found = False
-				
-		cur_word.remove(word)
-	return complex_words
-
 
 def main():
 	shortoptions = 'hL:'
