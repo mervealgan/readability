@@ -1,94 +1,170 @@
-#!/usr/bin/env python
+"""Simple readability measures.
 
+Usage: %s [--lang=<x>] [file]
+
+By default, input is read from standard input.
+Text should be encoded with UTF-8,
+one sentence per line, tokens space-separated.
+
+  -L, --lang=<x>   set language for syllabification (default: en)."""
+from __future__ import division, print_function
+import io
+import sys
 import math
-
-from utils import get_char_count
-from utils import get_words
-from utils import get_sentences
-from utils import count_syllables
-from utils import count_complex_words
-
+import getopt
+import collections
+import syllables
 
 class Readability:
-    analyzedVars = {}
+	def __init__(self, text, lang='en'):
+		"""Text has one sentence per line, with space separated tokens."""
+		self.words = text.split()
+		char_count = get_char_count(self.words)
+		syllable_count = count_syllables(self.words, lang)
+		word_count = len(self.words)
+		sentences = text.splitlines()
+		complexwords_count = count_complex_words(self.words, sentences, lang)
+		sentence_count = len(sentences)
+		avg_words_p_sentence = word_count / sentence_count
 
-    def __init__(self, text):
-        self.analyze_text(text)
+		self.stats = collections.OrderedDict([
+				('char_cnt', (char_count)),
+				('word_cnt', (word_count)),
+				('avg_char_p_word', (char_count / word_count)),
+				('syllable_cnt', (syllable_count)),
+				('avg_syll_p_word', (syllable_count / word_count)),
+				('complex_word_cnt', (complexwords_count)),
+				('sentence_cnt', (sentence_count)),
+				('avg_words_p_sentence', (avg_words_p_sentence)),
+			])
+		self.readability = collections.OrderedDict([
+				('FleschKincaidGradeLevel', self.FleschKincaidGradeLevel()),
+				('ARI', self.ARI()),
+				('ColemanLiauIndex', self.ColemanLiauIndex()),
+				('FleschReadingEase', self.FleschReadingEase()),
+				('GunningFogIndex', self.GunningFogIndex()),
+				('LIX', self.LIX()),
+				('SMOGIndex', self.SMOGIndex()),
+				('RIX', self.RIX()),
+			])
 
-    def analyze_text(self, text):
-        words = get_words(text)
-        char_count = get_char_count(words)
-        word_count = len(words)
-        sentence_count = len(get_sentences(text))
-        syllable_count = count_syllables(words)
-        complexwords_count = count_complex_words(text)
-        avg_words_p_sentence = word_count/sentence_count
-        
-        self.analyzedVars = {
-            'words': words,
-            'char_cnt': float(char_count),
-            'word_cnt': float(word_count),
-            'sentence_cnt': float(sentence_count),
-            'syllable_cnt': float(syllable_count),
-            'complex_word_cnt': float(complexwords_count),
-            'avg_words_p_sentence': float(avg_words_p_sentence)
-        }
+	def ARI(self):
+		return 4.71 * (self.stats['char_cnt'] / self.stats['word_cnt']
+				) + 0.5 * (self.stats['word_cnt']
+				/ self.stats['sentence_cnt']) - 21.43
+		
+	def FleschReadingEase(self):
+		return 206.835 - (1.015 * (self.stats['avg_words_p_sentence'])
+				) - (84.6 * (self.stats['syllable_cnt'] /
+					self.stats['word_cnt']))
+		
+	def FleschKincaidGradeLevel(self):
+		return 0.39 * (self.stats['avg_words_p_sentence']) + 11.8 * (
+				self.stats['syllable_cnt']/ self.stats['word_cnt']) - 15.59
+		
+	def GunningFogIndex(self):
+		return 0.4 * ((self.stats['avg_words_p_sentence']) + (100 * (
+				self.stats['complex_word_cnt']/self.stats['word_cnt'])))
 
-    def ARI(self):
-        score = 4.71 * (self.analyzedVars['char_cnt'] / self.analyzedVars['word_cnt']) + 0.5 * (self.analyzedVars['word_cnt'] / self.analyzedVars['sentence_cnt']) - 21.43
-        return score
-        
-    def FleschReadingEase(self):
-        score = 0.0
-        score = 206.835 - (1.015 * (self.analyzedVars['avg_words_p_sentence'])) - (84.6 * (self.analyzedVars['syllable_cnt']/ self.analyzedVars['word_cnt']))
-        return round(score, 4)
-        
-    def FleschKincaidGradeLevel(self):
-        score = 0.39 * (self.analyzedVars['avg_words_p_sentence']) + 11.8 * (self.analyzedVars['syllable_cnt']/ self.analyzedVars['word_cnt']) - 15.59
-        return round(score, 4)
-        
-    def GunningFogIndex(self):
-        score = 0.4 * ((self.analyzedVars['avg_words_p_sentence']) + (100 * (self.analyzedVars['complex_word_cnt']/self.analyzedVars['word_cnt'])))
-        return round(score, 4)
+	def SMOGIndex(self):
+		return (math.sqrt(self.stats['complex_word_cnt']
+				* (30 / self.stats['sentence_cnt'])) + 3)
 
-    def SMOGIndex(self):
-        score = (math.sqrt(self.analyzedVars['complex_word_cnt']*(30/self.analyzedVars['sentence_cnt'])) + 3)
-        return score
+	def ColemanLiauIndex(self):
+		return (5.89 * (self.stats['char_cnt'] / self.stats['word_cnt'])
+				) - (30 * (self.stats['sentence_cnt'] /
+					self.stats['word_cnt'])) - 15.8
 
-    def ColemanLiauIndex(self):
-        score = (5.89*(self.analyzedVars['char_cnt']/self.analyzedVars['word_cnt']))-(30*(self.analyzedVars['sentence_cnt']/self.analyzedVars['word_cnt']))-15.8
-        return round(score, 4)
+	def LIX(self):
+		longwords = 0.0
+		for word in self.words:
+			if len(word) >= 7:
+				longwords += 1.0
+		return self.stats['word_cnt'] / self.stats['sentence_cnt'] + (
+				100 * longwords) / self.stats['word_cnt']
 
-    def LIX(self):
-        longwords = 0.0
-        for word in self.analyzedVars['words']:
-            if len(word) >= 7:
-                longwords += 1.0
-        score = self.analyzedVars['word_cnt'] / self.analyzedVars['sentence_cnt'] + float(100 * longwords) / self.analyzedVars['word_cnt']
-        return score
+	def RIX(self):
+		longwords = 0.0
+		for word in self.words:
+			if len(word) >= 7:
+				longwords += 1.0
+		return longwords / self.stats['sentence_cnt']
+		
 
-    def RIX(self):
-        score = 0.0
-        longwords = 0.0
-        for word in self.analyzedVars['words']:
-            if len(word) >= 7:
-                longwords += 1.0
-        score = longwords / self.analyzedVars['sentence_cnt']
-        return score
-        
+def get_char_count(words):
+	characters = 0
+	for word in words:
+		if word == "'s":
+			characters += 2
+		else:
+			characters += sum(1 for char in word
+					if char.isdigit() or char.isalpha() or char == '-')
+	return characters
+	
+def count_syllables(words, lang):
+	syllableCount = 0
+	for word in words:
+		syllableCount += syllables.count(word, lang)
+	return syllableCount
+
+#This method must be enhanced. At the moment it only
+#considers the number of syllables in a word.
+#This often results in that too many complex words are detected.
+def count_complex_words(words, sentences, lang):
+	complex_words = 0
+	found = False
+	cur_word = []
+	
+	for word in words:
+		cur_word.append(word)
+		if count_syllables(cur_word, lang) >= 3:
+			
+			#Checking proper nouns. If a word starts with a capital letter
+			#and is NOT at the beginning of a sentence we don't add it
+			#as a complex word.
+			if not(word[0].isupper()):
+				complex_words += 1
+			else:
+				for sentence in sentences:
+					if str(sentence).startswith(word):
+						found = True
+						break
+				if found:
+					complex_words += 1
+					found = False
+				
+		cur_word.remove(word)
+	return complex_words
+
+
+def main():
+	shortoptions = 'hL:'
+	options = 'help lang='.split()
+	try:
+		opts, args = getopt.gnu_getopt(sys.argv[1:], shortoptions, options)
+	except getopt.GetoptError as err:
+		print('error: %r\n%s' % (err, __doc__ % sys.argv[0]))
+		sys.exit(2)
+	opts = dict(opts)
+	if '--help' in opts or '-h' in opts:
+		print(__doc__ % sys.argv[0])
+		return
+	if len(args) == 0:
+		text = sys.stdin.read().decode('utf-8')
+	elif len(args) == 1:
+		text = io.open(args[0], encoding='utf-8').read()
+	else:
+		raise ValueError('expected 0 or 1 file argument.')
+
+	rd = Readability(text, opts.get('lang', 'en'))
+	print('readability grades:')
+	for key, val in rd.readability.items():
+		print('\t%s: %g' % (key, round(val, 2)))
+	print('sentence info:')
+	for key, val in rd.stats.items():
+		print('\t%s: %g' % (key, round(val, 2)))
+	#print('word usage:')
+	#print('sentence beginnings:')
 
 if __name__ == "__main__":
-    text = """We are close to wrapping up our 10 week Rails Course. This week we will cover a handful of topics commonly encountered in Rails projects. We then wrap up with part 2 of our Reddit on Rails exercise!  By now you should be hard at work on your personal projects. The students in the course just presented in front of the class with some live demos and a brief intro to to the problems their app were solving. Maybe set aside some time this week to show someone your progress, block off 5 minutes and describe what goal you are working towards, the current state of the project (is it almost done, just getting started, needs UI, etc.), and then show them a quick demo of the app. Explain what type of feedback you are looking for (conceptual, design, usability, etc.) and see what they have to say.  As we are wrapping up the course you need to be focused on learning as much as you can, but also making sure you have the tools to succeed after the class is over."""
-
-    rd = Readability(text)
-    print 'Test text:'
-    print '"%s"\n' % text
-    print 'ARI: ', rd.ARI()
-    print 'FleschReadingEase: ', rd.FleschReadingEase()
-    print 'FleschKincaidGradeLevel: ', rd.FleschKincaidGradeLevel()
-    print 'GunningFogIndex: ', rd.GunningFogIndex()
-    print 'SMOGIndex: ', rd.SMOGIndex()
-    print 'ColemanLiauIndex: ', rd.ColemanLiauIndex()
-    print 'LIX: ', rd.LIX()
-    print 'RIX: ', rd.RIX()
-
+	main()
