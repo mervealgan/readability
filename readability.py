@@ -6,7 +6,7 @@ By default, input is read from standard input.
 Text should be encoded with UTF-8,
 one sentence per line, tokens space-separated.
 
-  -L, --lang=<x>   set language for syllabification (default: en)."""
+  -L, --lang=<x>   set language for syllabification (available: %s)."""
 from __future__ import division, print_function
 import io
 import re
@@ -30,6 +30,9 @@ class Readability:
 		long_words = 0
 		syllcount = syllables.COUNT[lang]
 
+		paragraph_count = text.count('\n\n')
+		sentence_count = text.count('\n') - paragraph_count
+
 		for word in self.tokens:
 			if PUNCT.match(word):
 				continue
@@ -50,9 +53,6 @@ class Readability:
 				if syll >= 3:
 					if not word[0].isupper():
 						complex_words += 1
-
-		paragraph_count = text.count('\n\n')
-		sentence_count = text.count('\n') - paragraph_count
 
 		self.stats = collections.OrderedDict([
 				('chars', characters),
@@ -79,31 +79,34 @@ class Readability:
 			])
 
 	def ARI(self):
-		return 4.71 * (self.stats['chars'] / self.stats['words']
-				) + 0.5 * (self.stats['words']
-				/ self.stats['sentences']) - 21.43
-		
+		return (4.71 * (self.stats['chars'] / self.stats['words'])
+				+ 0.5 * (self.stats['words']
+				/ self.stats['sentences']) - 21.43)
+
 	def FleschReadingEase(self):
-		return 206.835 - (1.015 * (self.stats['avg_words_per_sent'])
-				) - (84.6 * (self.stats['syllables'] /
-					self.stats['words']))
-		
+		return (206.835
+				- 84.6 * (self.stats['syllables'] / self.stats['words'])
+				- 1.015 * self.stats['avg_words_per_sent'])
+
 	def FleschKincaidGradeLevel(self):
 		return 0.39 * (self.stats['avg_words_per_sent']) + 11.8 * (
-				self.stats['syllables']/ self.stats['words']) - 15.59
-		
+				self.stats['syllables'] / self.stats['words']) - 15.59
+
 	def GunningFogIndex(self):
 		return 0.4 * ((self.stats['avg_words_per_sent']) + (100 * (
-				self.stats['complex_words']/self.stats['words'])))
+				self.stats['complex_words'] / self.stats['words'])))
 
 	def SMOGIndex(self):
 		return (math.sqrt(self.stats['complex_words']
 				* (30 / self.stats['sentences'])) + 3)
 
 	def ColemanLiauIndex(self):
-		return (5.89 * (self.stats['chars'] / self.stats['words'])
-				) - (30 * (self.stats['sentences'] /
-					self.stats['words'])) - 15.8
+		#return (5.89 * (self.stats['chars'] / self.stats['words'])
+		#		) - (30 * (self.stats['sentences'] /
+		#			self.stats['words'])) - 15.8
+		return (5.879851 * self.stats['chars'] / self.stats['words']
+				- 29.587280 * self.stats['sentences'] / self.stats['words']
+				- 15.800804)
 
 	def LIX(self):
 		return self.stats['words'] / self.stats['sentences'] + (
@@ -111,7 +114,7 @@ class Readability:
 
 	def RIX(self):
 		return self.stats['long_words'] / self.stats['sentences']
-		
+
 
 def main():
 	shortoptions = 'hL:'
@@ -119,11 +122,12 @@ def main():
 	try:
 		opts, args = getopt.gnu_getopt(sys.argv[1:], shortoptions, options)
 	except getopt.GetoptError as err:
-		print('error: %r\n%s' % (err, __doc__ % sys.argv[0]))
+		print('error: %r\n%s' % (err, __doc__ % (
+				sys.argv[0], ', '.join(syllables.COUNT))))
 		sys.exit(2)
 	opts = dict(opts)
 	if '--help' in opts or '-h' in opts:
-		print(__doc__ % sys.argv[0])
+		print(__doc__ % (sys.argv[0], ', '.join(syllables.COUNT)))
 		return
 	if len(args) == 0:
 		text = sys.stdin.read().decode('utf-8')

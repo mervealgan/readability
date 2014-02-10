@@ -2,9 +2,8 @@ Readability
 ====================
 
 A collection of functions that measure the readability of a given body of text.
-I'd recommend checking out the wikipedia articles below--most of the metrics
-estimate the grade level required to comprehend a given block of text and may
-return odd results on small snippets of text.
+The functionality is modeled after the UNIX style(1) command. Compared to the
+implmentation as part of GNU diction, this version supports UTF-8 encoded text.
 
 Usage: readability.py [--lang=<x>] [file]
 
@@ -16,26 +15,53 @@ one sentence per line, tokens space-separated.
 
 Demo:
 
-    $ ucto -L en -n -s '' sometext.txt | python readability.py
+    $ python readability.py LICENSE.txt
 	readability grades:
-			FleschKincaidGradeLevel: 7.69
-			ARI: 9.29
-			ColemanLiauIndex: 13.95
-			FleschReadingEase: 52.11
-			GunningFogIndex: 7.02
-			LIX: 33.14
-			SMOGIndex: 7.69
-			RIX: 1.8
+		FleschKincaidGradeLevel: 7.53
+		ARI: 8.09
+		ColemanLiauIndex: 12.35
+		FleschReadingEase: 55.52
+		GunningFogIndex: 8.18
+		LIX: 43.9
+		SMOGIndex: 8.48
+		RIX: 2.9
 	sentence info:
-			char_cnt: 1785
-			word_cnt: 308
-			avg_char_p_word: 5.8
-			syllable_cnt: 538
-			avg_syll_p_word: 1.75
-			complex_word_cnt: 33
-			sentence_cnt: 45
-			avg_words_p_sentence: 6.84
+		chars: 438
+		words: 81
+		avg_chars_per_word: 5.41
+		syllables: 137
+		avg_syll_per_word: 1.69
+		complex_words: 10
+		long_words: 29
+		sentences: 10
+		avg_words_per_sent: 8.1
+		paragraphs: 3
+		sent_per_paragraph: 3.33
 
+For proper results, the text should be tokenized, for example using 'ucto':
+
+	$ ucto -L en -n -s '' "CONRAD, Joseph - Lord Jim.txt" | python readability.py
+	readability grades:
+			FleschKincaidGradeLevel: 5.79
+			ARI: 6.38
+			ColemanLiauIndex: 6.92
+			FleschReadingEase: 82.69
+			GunningFogIndex: 9.94
+			LIX: 32.25
+			SMOGIndex: 9.46
+			RIX: 2.6
+	sentence info:
+			chars: 553643
+			words: 132780
+			avg_chars_per_word: 4.17
+			syllables: 168809
+			avg_syll_per_word: 1.27
+			complex_words: 11306
+			long_words: 21122
+			sentences: 8124
+			avg_words_per_sent: 16.34
+			paragraphs: 699
+			sent_per_paragraph: 11.62
 
 The following readability metrics are included in readability.py:
 
@@ -53,5 +79,3 @@ The code is based on:
 Which in turn was based on:
 
     https://github.com/nltk/nltk_contrib/tree/master/nltk_contrib/readability
-
-SMOG index appears to perform most accurately.

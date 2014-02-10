@@ -1,9 +1,12 @@
+# -*- coding: UTF-8 -*-
 """Fallback syllable counter.
 
 This is based on the algorithm in Greg Fast's perl module
 Lingua::EN::Syllable."""
 
 import re
+
+VOWELS = u'aoeuiaäeioöuüëéèàiï'  # y is special case; true for en.
 
 specialSyllables_en = """\
 tottered 2
@@ -84,6 +87,7 @@ _fallback_addsyl = ["ia", "riet", "dien", "iu", "io", "ii",
 fallback_subsyl = [re.compile(a) for a in _fallback_subsyl]
 fallback_addsyl = [re.compile(a) for a in _fallback_addsyl]
 
+
 def _normalize_word(word):
 	return word.strip().lower()
 
@@ -114,7 +118,7 @@ def count_en(word):
 	result = 0
 	prev_was_vowel = 0
 	for c in word:
-		is_vowel = c in ("a", "e", "i", "o", "u", "y")
+		is_vowel = c in VOWELS or c == 'y'
 		if is_vowel and not prev_was_vowel:
 			result += 1
 		prev_was_vowel = is_vowel
@@ -133,7 +137,33 @@ def count_en(word):
 	return result
 
 
+def count_nlde(word):
+	"""Count syllables for Dutch / German words by counting vowel-consonant or
+	consonant-vowel pairs, depending on the first character being a vowel or
+	not. If it is, a trailing e will be handled with a special rule. """
+	result = n = 0
+	if word[0] in VOWELS:
+		while n < len(word):
+			if (len(word) - n >= 2 and word[n] in VOWELS
+					and word[n + 1] not in VOWELS):
+				result += 1
+				n += 1
+			elif (n == len(word) - 1 and len(word) > 1
+					and word[n - 1] not in VOWELS and word[n] == 'e'):
+				result += 1
+			n += 1
+	else:
+		while n < len(word):
+			if (len(word) - n >= 2 and word[n] in VOWELS
+					and word[n + 1] not in VOWELS):
+				result += 1
+				n += 1
+			n += 1
+	return result or 1
+
+
 COUNT = dict(
 		en=count_en,
-		# ...
+		de=count_nlde,
+		nl=count_nlde,
 		)
