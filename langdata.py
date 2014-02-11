@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import re
 import collections
 
-VOWELS = u'aoeuiaäeioöuüëéèàiï'  # y is special case; true for en.
+VOWELS = 'aoeuiaäeioöuüëéèàiï'  # y is special case; true for en.
 
 specialSyllables_en = """\
 tottered 2
@@ -104,7 +104,6 @@ def countsyllables_en(word):
 
 	This is based on the algorithm in Greg Fast's perl module
 	Lingua::EN::Syllable."""
-	word = _normalize_word(word)
 	if not word:
 		return 0
 
@@ -119,9 +118,9 @@ def countsyllables_en(word):
 
 	# Count vowel groups
 	result = 0
-	prev_was_vowel = 0
-	for c in word:
-		is_vowel = c in VOWELS or c == 'y'
+	prev_was_vowel = False
+	for char in word:
+		is_vowel = char in VOWELS or char == 'y'
 		if is_vowel and not prev_was_vowel:
 			result += 1
 		prev_was_vowel = is_vowel
@@ -143,25 +142,18 @@ def countsyllables_en(word):
 def countsyllables_nlde(word):
 	"""Count syllables for Dutch / German words by counting vowel-consonant or
 	consonant-vowel pairs, depending on the first character being a vowel or
-	not. If it is, a trailing e will be handled with a special rule. """
-	result = n = 0
-	if word[0] in VOWELS:
-		while n < len(word):
-			if (len(word) - n >= 2 and word[n] in VOWELS
-					and word[n + 1] not in VOWELS):
-				result += 1
-				n += 1
-			elif (n == len(word) - 1 and len(word) > 1
-					and word[n - 1] not in VOWELS and word[n] == 'e'):
-				result += 1
-			n += 1
-	else:
-		while n < len(word):
-			if (len(word) - n >= 2 and word[n] in VOWELS
-					and word[n + 1] not in VOWELS):
-				result += 1
-				n += 1
-			n += 1
+	not. If it is, a trailing e will be handled with a special rule."""
+	result = 0
+	prev_was_vowel = word[0] in VOWELS
+	for char in word[1:]:
+		is_vowel = char in VOWELS
+		if prev_was_vowel and is_vowel:
+			result += 1
+		prev_was_vowel = is_vowel
+
+	if (len(word) > 1 and word[0] in VOWELS
+			and word.endswith('e') and not word[-2] in VOWELS):
+		result += 1
 	return result or 1
 
 
@@ -202,10 +194,10 @@ words_en = collections.OrderedDict([
 		'\\b(%s)\\b' % preposition_en, re.IGNORECASE)),
     # a bit limited, but this is exactly what the original style(1) did:
 	('nominalization', re.compile(
-		r'\b.{3,}(tion|ment|ence|ance)\b', re.IGNORECASE)),
+		r'\b\w{3,}(tion|ment|ence|ance)\b', re.IGNORECASE | re.UNICODE)),
 	])
 
-enbeginnings = collections.OrderedDict([
+beginnings_en = collections.OrderedDict([
 	('pronoun', re.compile(
 		'(^|\\n)(%s)\\b' % pronoun_en, re.IGNORECASE)),
 	('interrogative', re.compile(
@@ -311,7 +303,7 @@ LANGDATA = dict(
 		en=dict(
 			syllables=countsyllables_en,
 			words=words_en,
-			beginnings=enbeginnings),
+			beginnings=beginnings_en),
 		nl=dict(
 			syllables=countsyllables_nlde,
 			words=words_nl,

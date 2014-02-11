@@ -13,6 +13,7 @@ import io
 import re
 import sys
 import math
+import codecs
 import getopt
 import collections
 from langdata import LANGDATA
@@ -22,32 +23,48 @@ PUNCT = re.compile(r"^\W+$", re.UNICODE)
 
 class Readability:
 	def __init__(self, text, lang='en'):
-		"""text has one sentence per line, with space separated tokens."""
+		"""text is an iterable with one sentence per line
+		and space separated tokens."""
 		characters = 0
 		words = 0
 		syllable_count = 0
 		complex_words = 0
 		long_words = 0
-		syllcount = LANGDATA[lang]['syllables']
+		paragraph_count = 1
+		sentence_count = 0
+		syllcounter = LANGDATA[lang]['syllables']
+		wordusageregexps = LANGDATA[lang]['words']
+		beginningsregexps = LANGDATA[lang]['beginnings']
+		self.wordusage = collections.OrderedDict([(name, 0) for name, regexp
+				in wordusageregexps.items()])
+		self.beginnings = collections.OrderedDict([(name, 0) for name, regexp
+				in beginningsregexps.items()])
 
-		paragraph_count = text.count('\n\n')
-		sentence_count = text.count('\n') - paragraph_count
+		for sent in text:
+			sent = sent.strip()
+			if not sent:
+				paragraph_count += 1
+			sentence_count += 1
+			for token in sent.split():
+				if PUNCT.match(token):
+					continue
+				words += 1
+				characters += len(token)
+				syll = syllcounter(token)
+				syllable_count += syll
+				if len(token) >= 7:
+					long_words += 1
 
-		for token in text.split():
-			if PUNCT.match(token):
-				continue
-			words += 1
-			characters += len(token)
-			syll = syllcount(token)
-			syllable_count += syll
-			if len(token) >= 7:
-				long_words += 1
+				# This method could be improved. At the moment it only
+				# considers the number of syllables in a word. This often
+				# results in that too many complex words are detected.
+				if syll >= 3 and not token[0].isupper():  # ignore proper nouns
+					complex_words += 1
 
-			# This method could be improved. At the moment it only considers
-			# the number of syllables in a word. This often results in that
-			# too many complex words are detected.
-			if syll >= 3 and not token[0].isupper():  # ignore proper nouns
-				complex_words += 1
+			for name, regexp in wordusageregexps.items():
+				self.wordusage[name] += sum(1 for _ in regexp.finditer(sent))
+			for name, regexp in beginningsregexps.items():
+				self.beginnings[name] += regexp.match(sent) is not None
 
 		self.stats = collections.OrderedDict([
 				('chars', characters),
@@ -72,12 +89,6 @@ class Readability:
 				('SMOGIndex', self.SMOGIndex()),
 				('RIX', self.RIX()),
 			])
-		self.wordusage = collections.OrderedDict([
-				(name, sum(1 for _ in regexp.finditer(text)))
-				for name, regexp in LANGDATA[lang]['words'].items()])
-		self.beginnings = collections.OrderedDict([
-				(name, sum(1 for _ in regexp.finditer(text)))
-				for name, regexp in LANGDATA[lang]['beginnings'].items()])
 
 	def ARI(self):
 		return (4.71 * (self.stats['chars'] / self.stats['words'])
@@ -131,9 +142,9 @@ def main():
 		print(__doc__ % (sys.argv[0], ', '.join(LANGDATA)))
 		return
 	if len(args) == 0:
-		text = sys.stdin.read().decode('utf-8')
+		text = codecs.getreader('utf-8')(sys.stdin)
 	elif len(args) == 1:
-		text = io.open(args[0], encoding='utf-8').read()
+		text = io.open(args[0], encoding='utf-8')
 	else:
 		raise ValueError('expected 0 or 1 file argument.')
 
