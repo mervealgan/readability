@@ -7,7 +7,7 @@ Text should be encoded with UTF-8,
 one sentence per line, tokens space-separated.
 
 Options:
-  -L, --lang=<x>   set language for syllabification (available: %s)."""
+  -L, --lang=<x>   set language (available: %s)."""
 from __future__ import division, print_function, unicode_literals
 import io
 import re
@@ -21,111 +21,130 @@ from langdata import LANGDATA
 PUNCT = re.compile(r"^\W+$", re.UNICODE)
 
 
-class Readability:
-	def __init__(self, text, lang='en'):
-		"""text is an iterable with one sentence per line
-		and space separated tokens."""
-		characters = 0
-		words = 0
-		syllable_count = 0
-		complex_words = 0
-		long_words = 0
-		paragraph_count = 1
-		sentence_count = 0
-		syllcounter = LANGDATA[lang]['syllables']
-		wordusageregexps = LANGDATA[lang]['words']
-		beginningsregexps = LANGDATA[lang]['beginnings']
-		self.wordusage = collections.OrderedDict([(name, 0) for name, regexp
-				in wordusageregexps.items()])
-		self.beginnings = collections.OrderedDict([(name, 0) for name, regexp
-				in beginningsregexps.items()])
+def getmeasures(text, lang='en'):
+	"""Collect surface characteristics of a tokenized text.
 
-		for sent in text:
-			sent = sent.strip()
-			if not sent:
-				paragraph_count += 1
-			sentence_count += 1
-			for token in sent.split():
-				if PUNCT.match(token):
-					continue
-				words += 1
-				characters += len(token)
-				syll = syllcounter(token)
-				syllable_count += syll
-				if len(token) >= 7:
-					long_words += 1
+	>>> text = "A tokenized sentence .\\nAnother sentence ."
+	>>> result = getmeasures(text.splitlines())
+	>>> result['sentence info']['words'] == 5
+	True
 
-				# This method could be improved. At the moment it only
-				# considers the number of syllables in a word. This often
-				# results in that too many complex words are detected.
-				if syll >= 3 and not token[0].isupper():  # ignore proper nouns
-					complex_words += 1
+	:param text: an iterable returning lines, one sentence per line
+		of space separated tokens.
+	:param lang: a language code to select the syllabification procedure and
+		word types to count.
+	:returns: a two-level ordered dictionary with measurements."""
+	characters = 0
+	words = 0
+	syllables = 0
+	complex_words = 0
+	long_words = 0
+	paragraphs = 1
+	sentences = 0
+	syllcounter = LANGDATA[lang]['syllables']
+	wordusageregexps = LANGDATA[lang]['words']
+	beginningsregexps = LANGDATA[lang]['beginnings']
 
-			for name, regexp in wordusageregexps.items():
-				self.wordusage[name] += sum(1 for _ in regexp.finditer(sent))
-			for name, regexp in beginningsregexps.items():
-				self.beginnings[name] += regexp.match(sent) is not None
+	wordusage = collections.OrderedDict([(name, 0) for name, regexp
+			in wordusageregexps.items()])
+	beginnings = collections.OrderedDict([(name, 0) for name, regexp
+			in beginningsregexps.items()])
 
-		if not words:
-			raise ValueError("I can't do this, there's no words there!")
+	for sent in text:
+		sent = sent.strip()
+		if not sent:
+			paragraphs += 1
+		sentences += 1
+		for token in sent.split():
+			if PUNCT.match(token):
+				continue
+			words += 1
+			characters += len(token)
+			syll = syllcounter(token)
+			syllables += syll
+			if len(token) >= 7:
+				long_words += 1
 
-		self.stats = collections.OrderedDict([
-				('characters', characters),
-				('syllables', syllable_count),
-				('words', words),
-				('sentences', sentence_count),
-				('paragraphs', paragraph_count),
-				('long_words', long_words),
-				('complex_words', complex_words),
-				('chars_per_word', characters / words),
-				('syll_per_word', syllable_count / words),
-				('words_per_sent', words / sentence_count),
-				('sent_per_paragraph', sentence_count / paragraph_count),
-			])
-		self.readability = collections.OrderedDict([
-				('Kincaid', self.FleschKincaidGradeLevel()),
-				('ARI', self.ARI()),
-				('ColemanLiauIndex', self.ColemanLiauIndex()),
-				('FleschReadingEase', self.FleschReadingEase()),
-				('GunningFogIndex', self.GunningFogIndex()),
-				('LIX', self.LIX()),
-				('SMOGIndex', self.SMOGIndex()),
-				('RIX', self.RIX()),
-			])
+			# This method could be improved. At the moment it only
+			# considers the number of syllables in a word. This often
+			# results in that too many complex words are detected.
+			if syll >= 3 and not token[0].isupper():  # ignore proper nouns
+				complex_words += 1
 
-	def ARI(self):
-		return (4.71 * (self.stats['characters'] / self.stats['words'])
-				+ 0.5 * (self.stats['words']
-				/ self.stats['sentences']) - 21.43)
+		for name, regexp in wordusageregexps.items():
+			wordusage[name] += sum(1 for _ in regexp.finditer(sent))
+		for name, regexp in beginningsregexps.items():
+			beginnings[name] += regexp.match(sent) is not None
 
-	def FleschReadingEase(self):
-		return (206.835
-				- 84.6 * (self.stats['syllables'] / self.stats['words'])
-				- 1.015 * self.stats['words_per_sent'])
+	if not words:
+		raise ValueError("I can't do this, there's no words there!")
 
-	def FleschKincaidGradeLevel(self):
-		return (11.8 * (self.stats['syllables'] / self.stats['words']) +
-				0.39 * (self.stats['words_per_sent']) - 15.59)
+	stats = collections.OrderedDict([
+			('characters', characters),
+			('syllables', syllables),
+			('words', words),
+			('sentences', sentences),
+			('paragraphs', paragraphs),
+			('long_words', long_words),
+			('complex_words', complex_words),
+			('chars_per_word', characters / words),
+			('syll_per_word', syllables / words),
+			('words_per_sent', words / sentences),
+			('sent_per_paragraph', sentences / paragraphs),
+		])
+	readability = collections.OrderedDict([
+			('Kincaid', KincaidGradeLevel(syllables, words, sentences)),
+			('ARI', ARI(characters, words, sentences)),
+			('ColemanLiauIndex',
+				ColemanLiauIndex(characters, words, sentences)),
+			('FleschReadingEase',
+				FleschReadingEase(syllables, words, sentences)),
+			('GunningFogIndex',
+				GunningFogIndex(words, complex_words, sentences)),
+			('LIX', LIX(words, long_words, sentences)),
+			('SMOGIndex', SMOGIndex(complex_words, sentences)),
+			('RIX', RIX(long_words, sentences)),
+		])
 
-	def GunningFogIndex(self):
-		return 0.4 * ((self.stats['words_per_sent']) + (100 * (
-				self.stats['complex_words'] / self.stats['words'])))
+	return collections.OrderedDict([
+		('readability grades', readability),
+		('sentence info', stats),
+		('word usage', wordusage),
+		('sentence beginnings', beginnings),
+		])
 
-	def SMOGIndex(self):
-		return (math.sqrt(self.stats['complex_words']
-				* (30 / self.stats['sentences'])) + 3)
 
-	def ColemanLiauIndex(self):
-		return (5.879851 * self.stats['characters'] / self.stats['words']
-				- 29.587280 * self.stats['sentences'] / self.stats['words']
-				- 15.800804)
+def KincaidGradeLevel(syllables, words, sentences):
+	return 11.8 * (syllables / words) + 0.39 * ((words / sentences)) - 15.59
 
-	def LIX(self):
-		return self.stats['words'] / self.stats['sentences'] + (
-				100 * self.stats['long_words']) / self.stats['words']
 
-	def RIX(self):
-		return self.stats['long_words'] / self.stats['sentences']
+def ARI(characters, words, sentences):
+	return 4.71 * (characters / words) + 0.5 * (words / sentences) - 21.43
+
+
+def ColemanLiauIndex(characters, words, sentences):
+	return (5.879851 * characters / words - 29.587280 * sentences / words
+			- 15.800804)
+
+
+def FleschReadingEase(syllables, words, sentences):
+	return 206.835 - 84.6 * (syllables / words) - 1.015 * (words / sentences)
+
+
+def GunningFogIndex(words, complex_words, sentences):
+	return 0.4 * (((words / sentences)) + (100 * (complex_words / words)))
+
+
+def LIX(words, long_words, sentences):
+	return words / sentences + (100 * long_words) / words
+
+
+def SMOGIndex(complex_words, sentences):
+	return math.sqrt(complex_words * (30 / sentences)) + 3
+
+
+def RIX(long_words, sentences):
+	return long_words / sentences
 
 
 def main():
@@ -148,12 +167,9 @@ def main():
 	else:
 		raise ValueError('expected 0 or 1 file argument.')
 
-	rd = Readability(text, opts.get('--lang', opts.get('-L', 'en')))
-	for cat, data in zip(
-			['readability grades:', 'sentence info:',
-				'word usage:', 'sentence beginnings:', ],
-			[rd.readability, rd.stats, rd.wordusage, rd.beginnings]):
-		print(cat)
+	lang = opts.get('--lang', opts.get('-L', 'en'))
+	for cat, data in getmeasures(text, lang).items():
+		print(cat + ':')
 		for key, val in data.items():
 			print(('    %-20s %12.2f' % (key + ':', val)
 					).rstrip('0 ').rstrip('.'))
