@@ -1,14 +1,18 @@
 Readability
-====================
+===========
 
 A collection of functions that measure the readability of a given body of text
 using surface characteristics. These measures are basically linear regressions
 based on the number of words, syllables, and sentences.
 
 The functionality is modeled after the UNIX style(1) command. Compared to the
-implmentation as part of [GNU diction](http://www.moria.de/~michael/diction/),
+implementation as part of [GNU diction](http://www.moria.de/~michael/diction/),
 this version supports UTF-8 encoded text, but expects sentence-segmented and
-tokenized text.
+tokenized text. The syllabification and word type recognition is based on
+simple heuristics and only provides a rough measure.
+
+Usage
+-----
 
 	$ python readability.py --help
 	Simple readability measures.
@@ -35,6 +39,10 @@ For proper results, the text should be tokenized, for example using [ucto](http:
 		SMOGIndex:                   9.2
 		RIX:                         2.39
 	sentence info:
+		chars_per_word:              4.19
+		syll_per_word:               1.25
+		words_per_sent:             14.92
+		sent_per_paragraph:         12.6
 		characters:             552074
 		syllables:              164207
 		words:                  131668
@@ -42,10 +50,6 @@ For proper results, the text should be tokenized, for example using [ucto](http:
 		paragraphs:                700
 		long_words:              21122
 		complex_words:           11306
-		chars_per_word:              4.19
-		syll_per_word:               1.25
-		words_per_sent:             14.92
-		sent_per_paragraph:         12.6
 	word usage:
 		tobeverb:                 3909
 		auxverb:                  1632
@@ -62,6 +66,8 @@ For proper results, the text should be tokenized, for example using [ucto](http:
 		preposition:               404
 
 
+References
+----------
 The following readability metrics are included:
 
 1. http://en.wikipedia.org/wiki/Automated_Readability_Index
@@ -71,16 +77,6 @@ The following readability metrics are included:
 5. http://en.wikipedia.org/wiki/Coleman-Liau_Index
 6. http://en.wikipedia.org/wiki/Gunning-Fog_Index
 
-The code is based on:
-
-	https://github.com/mmautner/readability
-
-Which in turn was based on:
-
-    https://github.com/nltk/nltk_contrib/tree/master/nltk_contrib/readability
-
-References
-----------
 For better readability measures, consider the following:
 
 - Collins-Thompson & Callan (2004). A language modeling approach to predicting reading difficulty.
@@ -89,3 +85,13 @@ For better readability measures, consider the following:
   Proc.~of ACL, pp. 523-530. http://www.aclweb.org/anthology/P05-1065.pdf
 - The Lexile framework for reading. http://www.lexile.com
 - Coh-Metrix. http://cohmetrix.memphis.edu/
+
+Acknowledgments
+---------------
+The code is based on:
+
+	https://github.com/mmautner/readability
+
+Which in turn was based on:
+
+    https://github.com/nltk/nltk_contrib/tree/master/nltk_contrib/readability
