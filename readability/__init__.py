@@ -10,13 +10,14 @@ Options:
   -L, --lang=<x>   set language (available: %s)."""
 from __future__ import division, print_function, unicode_literals
 import io
+import os
 import re
 import sys
 import math
 import codecs
 import getopt
 import collections
-from langdata import LANGDATA
+from readability.langdata import LANGDATA
 
 PUNCT = re.compile(r"^\W+$", re.UNICODE)
 
@@ -150,15 +151,16 @@ def RIX(long_words, sentences):
 def main():
 	shortoptions = 'hL:'
 	options = 'help lang='.split()
+	cmd = os.path.basename(sys.argv[0])
 	try:
 		opts, args = getopt.gnu_getopt(sys.argv[1:], shortoptions, options)
 	except getopt.GetoptError as err:
 		print('error: %r\n%s' % (err, __doc__ % (
-				sys.argv[0], ', '.join(LANGDATA))))
+				cmd, ', '.join(LANGDATA))))
 		sys.exit(2)
 	opts = dict(opts)
 	if '--help' in opts or '-h' in opts:
-		print(__doc__ % (sys.argv[0], ', '.join(LANGDATA)))
+		print(__doc__ % (cmd, ', '.join(LANGDATA)))
 		return
 	if len(args) == 0:
 		text = codecs.getreader('utf-8')(sys.stdin)

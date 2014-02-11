@@ -11,10 +11,15 @@ this version supports UTF-8 encoded text, but expects sentence-segmented and
 tokenized text. The syllabification and word type recognition is based on
 simple heuristics and only provides a rough measure.
 
+Installation
+------------
+
+	$ pip install https://github.com/andreasvc/readability/tarball/master
+
 Usage
 -----
 
-	$ python readability.py --help
+	$ readability --help
 	Simple readability measures.
 
 	Usage: readability.py [--lang=<x>] [file]
@@ -80,9 +85,9 @@ The following readability metrics are included:
 For better readability measures, consider the following:
 
 - Collins-Thompson & Callan (2004). A language modeling approach to predicting reading difficulty.
-  In Proc. of HLT/NAACL, pp. 193-200. http://aclweb.org/anthology/N/N04/N04-1025.pdf
+  In Proc. of HLT/NAACL, pp. 193-200. http://aclweb.org/anthology/N04-1025.pdf
 - Schwarm & Ostendorf (2005). Reading level assessment using SVM and statistical language models.
-  Proc.~of ACL, pp. 523-530. http://www.aclweb.org/anthology/P05-1065.pdf
+  Proc. of ACL, pp. 523-530. http://www.aclweb.org/anthology/P05-1065.pdf
 - The Lexile framework for reading. http://www.lexile.com
 - Coh-Metrix. http://cohmetrix.memphis.edu/
 
