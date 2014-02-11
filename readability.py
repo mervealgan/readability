@@ -6,66 +6,61 @@ By default, input is read from standard input.
 Text should be encoded with UTF-8,
 one sentence per line, tokens space-separated.
 
+Options:
   -L, --lang=<x>   set language for syllabification (available: %s)."""
-from __future__ import division, print_function
+from __future__ import division, print_function, unicode_literals
 import io
 import re
 import sys
 import math
 import getopt
 import collections
-import syllables
+from langdata import LANGDATA
 
-PUNCT = re.compile('[.,:;\'"!?]')
+PUNCT = re.compile(r"^\W+$", re.UNICODE)
 
 
 class Readability:
 	def __init__(self, text, lang='en'):
 		"""text has one sentence per line, with space separated tokens."""
-		self.tokens = text.split()
 		characters = 0
 		words = 0
 		syllable_count = 0
 		complex_words = 0
 		long_words = 0
-		syllcount = syllables.COUNT[lang]
+		syllcount = LANGDATA[lang]['syllables']
 
 		paragraph_count = text.count('\n\n')
 		sentence_count = text.count('\n') - paragraph_count
 
-		for word in self.tokens:
-			if PUNCT.match(word):
+		for token in text.split():
+			if PUNCT.match(token):
 				continue
 			words += 1
-			if word == "'s":
-				characters += 2
-			else:
-				characters += sum(1 for char in word
-						if char.isdigit() or char.isalpha() or char == '-')
-				syll = syllcount(word)
-				syllable_count += syll
-				if len(word) >= 7:
-					long_words += 1
+			characters += len(token)
+			syll = syllcount(token)
+			syllable_count += syll
+			if len(token) >= 7:
+				long_words += 1
 
-				# This method must be enhanced. At the moment it only considers
-				# the number of syllables in a word. This often results in that
-				# too many complex words are detected.
-				if syll >= 3:
-					if not word[0].isupper():
-						complex_words += 1
+			# This method could be improved. At the moment it only considers
+			# the number of syllables in a word. This often results in that
+			# too many complex words are detected.
+			if syll >= 3 and not token[0].isupper():  # ignore proper nouns
+				complex_words += 1
 
 		self.stats = collections.OrderedDict([
 				('chars', characters),
-				('words', words),
-				('avg_chars_per_word', characters / words),
 				('syllables', syllable_count),
-				('avg_syll_per_word', syllable_count / words),
-				('complex_words', complex_words),
-				('long_words', long_words),
+				('words', words),
 				('sentences', sentence_count),
-				('avg_words_per_sent', words / sentence_count),
 				('paragraphs', paragraph_count),
+				('avg_chars_per_word', characters / words),
+				('avg_syll_per_word', syllable_count / words),
+				('avg_words_per_sent', words / sentence_count),
 				('sent_per_paragraph', sentence_count / paragraph_count),
+				('long_words', long_words),
+				('complex_words', complex_words),
 			])
 		self.readability = collections.OrderedDict([
 				('FleschKincaidGradeLevel', self.FleschKincaidGradeLevel()),
@@ -77,6 +72,12 @@ class Readability:
 				('SMOGIndex', self.SMOGIndex()),
 				('RIX', self.RIX()),
 			])
+		self.wordusage = collections.OrderedDict([
+				(name, sum(1 for _ in regexp.finditer(text)))
+				for name, regexp in LANGDATA[lang]['words'].items()])
+		self.beginnings = collections.OrderedDict([
+				(name, sum(1 for _ in regexp.finditer(text)))
+				for name, regexp in LANGDATA[lang]['beginnings'].items()])
 
 	def ARI(self):
 		return (4.71 * (self.stats['chars'] / self.stats['words'])
@@ -123,11 +124,11 @@ def main():
 		opts, args = getopt.gnu_getopt(sys.argv[1:], shortoptions, options)
 	except getopt.GetoptError as err:
 		print('error: %r\n%s' % (err, __doc__ % (
-				sys.argv[0], ', '.join(syllables.COUNT))))
+				sys.argv[0], ', '.join(LANGDATA))))
 		sys.exit(2)
 	opts = dict(opts)
 	if '--help' in opts or '-h' in opts:
-		print(__doc__ % (sys.argv[0], ', '.join(syllables.COUNT)))
+		print(__doc__ % (sys.argv[0], ', '.join(LANGDATA)))
 		return
 	if len(args) == 0:
 		text = sys.stdin.read().decode('utf-8')
@@ -136,15 +137,19 @@ def main():
 	else:
 		raise ValueError('expected 0 or 1 file argument.')
 
-	rd = Readability(text, opts.get('lang', 'en'))
+	rd = Readability(text, opts.get('--lang', opts.get('-L', 'en')))
 	print('readability grades:')
 	for key, val in rd.readability.items():
 		print('\t%s: %g' % (key, round(val, 2)))
 	print('sentence info:')
 	for key, val in rd.stats.items():
 		print('\t%s: %g' % (key, round(val, 2)))
-	#print('word usage:')
-	#print('sentence beginnings:')
+	print('word usage:')
+	for key, val in rd.wordusage.items():
+		print('\t%s: %g' % (key, round(val, 2)))
+	print('sentence beginnings:')
+	for key, val in rd.beginnings.items():
+		print('\t%s: %g' % (key, round(val, 2)))
 
 if __name__ == "__main__":
 	main()

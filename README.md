@@ -5,13 +5,16 @@ A collection of functions that measure the readability of a given body of text.
 The functionality is modeled after the UNIX style(1) command. Compared to the
 implmentation as part of GNU diction, this version supports UTF-8 encoded text.
 
-Usage: readability.py [--lang=<x>] [file]
+	$ python readability.py --help
+	Simple readability measures.
 
-By default, input is read from standard input.
-Text should be encoded with UTF-8,
-one sentence per line, tokens space-separated.
+	Usage: readability.py [--lang=<x>] [file]
 
-  -L, --lang=<x>   set language for syllabification (default: en).
+	By default, input is read from standard input.
+	Text should be encoded with UTF-8,
+	one sentence per line, tokens space-separated.
+
+	  -L, --lang=<x>   set language for syllabification (available: de, nl, en).
 
 Demo:
 
