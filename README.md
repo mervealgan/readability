@@ -1,9 +1,14 @@
 Readability
 ====================
 
-A collection of functions that measure the readability of a given body of text.
+A collection of functions that measure the readability of a given body of text
+using surface characteristics. These measures are basically linear regressions
+based on the number of words, syllables, and sentences.
+
 The functionality is modeled after the UNIX style(1) command. Compared to the
-implmentation as part of GNU diction, this version supports UTF-8 encoded text.
+implmentation as part of [GNU diction](http://www.moria.de/~michael/diction/),
+this version supports UTF-8 encoded text, but expects sentence-segmented and
+tokenized text.
 
 	$ python readability.py --help
 	Simple readability measures.
@@ -14,7 +19,7 @@ implmentation as part of GNU diction, this version supports UTF-8 encoded text.
 	Text should be encoded with UTF-8,
 	one sentence per line, tokens space-separated.
 
-	  -L, --lang=<x>   set language for syllabification (available: de, nl, en).
+	  -L, --lang=<x>   set language (available: de, nl, en).
 
 
 For proper results, the text should be tokenized, for example using [ucto](http://ilk.uvt.nl/ucto):
@@ -57,7 +62,7 @@ For proper results, the text should be tokenized, for example using [ucto](http:
 		preposition:               404
 
 
-The following readability metrics are included in readability.py:
+The following readability metrics are included:
 
 1. http://en.wikipedia.org/wiki/Automated_Readability_Index
 2. http://en.wikipedia.org/wiki/SMOG
@@ -73,3 +78,14 @@ The code is based on:
 Which in turn was based on:
 
     https://github.com/nltk/nltk_contrib/tree/master/nltk_contrib/readability
+
+References
+----------
+For better readability measures, consider the following:
+
+- Collins-Thompson & Callan (2004). A language modeling approach to predicting reading difficulty.
+  In Proc. of HLT/NAACL, pp. 193-200. http://aclweb.org/anthology/N/N04/N04-1025.pdf
+- Schwarm & Ostendorf (2005). Reading level assessment using SVM and statistical language models.
+  Proc.~of ACL, pp. 523-530. http://www.aclweb.org/anthology/P05-1065.pdf
+- The Lexile framework for reading. http://www.lexile.com
+- Coh-Metrix. http://cohmetrix.memphis.edu/
