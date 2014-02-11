@@ -16,55 +16,46 @@ implmentation as part of GNU diction, this version supports UTF-8 encoded text.
 
 	  -L, --lang=<x>   set language for syllabification (available: de, nl, en).
 
-Demo:
 
-    $ python readability.py LICENSE.txt
-	readability grades:
-		FleschKincaidGradeLevel: 7.53
-		ARI: 8.09
-		ColemanLiauIndex: 12.35
-		FleschReadingEase: 55.52
-		GunningFogIndex: 8.18
-		LIX: 43.9
-		SMOGIndex: 8.48
-		RIX: 2.9
-	sentence info:
-		chars: 438
-		words: 81
-		avg_chars_per_word: 5.41
-		syllables: 137
-		avg_syll_per_word: 1.69
-		complex_words: 10
-		long_words: 29
-		sentences: 10
-		avg_words_per_sent: 8.1
-		paragraphs: 3
-		sent_per_paragraph: 3.33
-
-For proper results, the text should be tokenized, for example using 'ucto':
+For proper results, the text should be tokenized, for example using [ucto](http://ilk.uvt.nl/ucto):
 
 	$ ucto -L en -n -s '' "CONRAD, Joseph - Lord Jim.txt" | python readability.py
 	readability grades:
-			FleschKincaidGradeLevel: 5.79
-			ARI: 6.38
-			ColemanLiauIndex: 6.92
-			FleschReadingEase: 82.69
-			GunningFogIndex: 9.94
-			LIX: 32.25
-			SMOGIndex: 9.46
-			RIX: 2.6
+		Kincaid:                     4.95
+		ARI:                         5.78
+		ColemanLiauIndex:            6.87
+		FleschReadingEase:          86.18
+		GunningFogIndex:             9.4
+		LIX:                        30.97
+		SMOGIndex:                   9.2
+		RIX:                         2.39
 	sentence info:
-			chars: 553643
-			words: 132780
-			avg_chars_per_word: 4.17
-			syllables: 168809
-			avg_syll_per_word: 1.27
-			complex_words: 11306
-			long_words: 21122
-			sentences: 8124
-			avg_words_per_sent: 16.34
-			paragraphs: 699
-			sent_per_paragraph: 11.62
+		characters:             552074
+		syllables:              164207
+		words:                  131668
+		sentences:                8823
+		paragraphs:                700
+		long_words:              21122
+		complex_words:           11306
+		chars_per_word:              4.19
+		syll_per_word:               1.25
+		words_per_sent:             14.92
+		sent_per_paragraph:         12.6
+	word usage:
+		tobeverb:                 3909
+		auxverb:                  1632
+		conjunction:              4413
+		pronoun:                 18104
+		preposition:             19271
+		nominalization:           1216
+	sentence beginnings:
+		pronoun:                  2593
+		interrogative:             215
+		article:                   632
+		subordination:             124
+		conjunction:               240
+		preposition:               404
+
 
 The following readability metrics are included in readability.py:
 

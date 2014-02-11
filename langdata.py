@@ -147,7 +147,7 @@ def countsyllables_nlde(word):
 	prev_was_vowel = word[0] in VOWELS
 	for char in word[1:]:
 		is_vowel = char in VOWELS
-		if prev_was_vowel and is_vowel:
+		if prev_was_vowel and not is_vowel:
 			result += 1
 		prev_was_vowel = is_vowel
 
@@ -158,7 +158,8 @@ def countsyllables_nlde(word):
 
 
 conjuction_en = r'and|but|or|yet|nor'
-preposition_en = ('board|about|above|according to|across from'
+preposition_en = (
+		'board|about|above|according to|across from'
 		'|after|against|alongside|alongside of|along with'
 		'|amid|among|apart from|around|aside from|at|away from'
 		'|back of|because of|before|behind|below|beneath|beside'
@@ -175,7 +176,8 @@ preposition_en = ('board|about|above|according to|across from'
 		'|till|toward|under|underneath|until|unto|up'
 		'|up to|upon|with|within|without|across|along'
 		'|by|of|in|to|near|of|from')
-pronoun_en = ('i|me|we|us|you|he|him|she|her|it|they'
+pronoun_en = (
+		'i|me|we|us|you|he|him|she|her|it|they'
 		'|them|thou|thee|ye|myself|yourself|himself'
 		'|herself|itself|ourselves|yourselves|themselves'
 		'|oneself|my|mine|his|hers|yours|ours|theirs|its'
@@ -217,7 +219,8 @@ beginnings_en = collections.OrderedDict([
 	])
 
 conjuction_nl = 'en|maar|of|want|dus|noch'
-preposition_nl = ("à|aan|ad|achter|behalve|beneden|betreffende|bij"
+preposition_nl = (
+		"à|aan|ad|achter|behalve|beneden|betreffende|bij"
 		"|binnen|blijkens|boven|buiten|circa|conform|contra"
 		"|cum|dankzij|door|gedurende|gezien|hangende|in"
 		"|ingevolge|inzake|jegens|krachtens|langs|met|middels"
@@ -250,16 +253,16 @@ words_nl = collections.OrderedDict([
 		# ('gehad', 'geweest', 'geworden') are not auxiliary.
 		# with past perfect verb
 		"heb|hebt|heeft|hebben|had|hadden"
-		"|ben|bent|is|zijn|was|waren"
 		"|word|wordt|worden|werd|werden"
+		#"|ben|bent|is|zijn|was|waren"
 		# with infinitive
 		"|zal|zult|zullen|zou|zouden"
 		"|kan|kan|kunt|kunnen|kon|konden"
 		"|wil|wilt|willen|wilde|wilden|wou|wouden"
-		"|mag|mogen|mocht|mochten"
 		"|moet|moeten|moest|moesten"
-		"|hoef|hoeft|hoeven|hoefde|hoefden"
-		"|doe|doet|doen|deed|deden"
+		#"|mag|mogen|mocht|mochten"
+		#"|hoef|hoeft|hoeven|hoefde|hoefden"
+		#"|doe|doet|doen|deed|deden"
 		")\\b", re.IGNORECASE)),
 	('conjunction', re.compile(
 		'\\b(%s)\\b' % conjuction_nl, re.IGNORECASE)),
@@ -282,7 +285,7 @@ beginnings_nl = collections.OrderedDict([
 	('subordination', re.compile(
 		"(^|\\n)("
 		# onderschikkende voegwoorden
-		"|aangezien|als|alsof|behalve|daar|daarom|dat"
+		"aangezien|als|alsof|behalve|daar|daarom|dat"
 		"|derhalve|doch|doordat|hoewel|indien|mits|nadat"
 		"|noch|ofschoon|omdat|ondanks|opdat|sedert|sinds"
 		"|tenzij|terwijl|toen|totdat|voordat|wanneer"
