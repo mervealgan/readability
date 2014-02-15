@@ -2,10 +2,10 @@ from distutils.core import setup
 
 setup(
 	name='readability',
-	version='0.1',
+	version='0.1pre',
 	description=('Measure the readability of a given text '
 		'using surface characteristics'),
-	long_description=open('README.md').read(),
+	long_description=open('README.rst').read(),
 	author='Andreas van Cranenburgh',
 	author_email='A.W.vanCranenburgh@uva.nl',
 	url='https://github.com/andreasvc/readability/',
