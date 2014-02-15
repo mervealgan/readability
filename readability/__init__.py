@@ -81,10 +81,10 @@ def getmeasures(text, lang='en'):
 		raise ValueError("I can't do this, there's no words there!")
 
 	stats = collections.OrderedDict([
-			('chars_per_word', characters / words),
+			('characters_per_word', characters / words),
 			('syll_per_word', syllables / words),
-			('words_per_sent', words / sentences),
-			('sent_per_paragraph', sentences / paragraphs),
+			('words_per_sentence', words / sentences),
+			('sentences_per_paragraph', sentences / paragraphs),
 			('characters', characters),
 			('syllables', syllables),
 			('words', words),
@@ -96,7 +96,7 @@ def getmeasures(text, lang='en'):
 	readability = collections.OrderedDict([
 			('Kincaid', KincaidGradeLevel(syllables, words, sentences)),
 			('ARI', ARI(characters, words, sentences)),
-			('ColemanLiauIndex',
+			('Coleman-Liau',
 				ColemanLiauIndex(characters, words, sentences)),
 			('FleschReadingEase',
 				FleschReadingEase(syllables, words, sentences)),

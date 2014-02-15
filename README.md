@@ -41,21 +41,22 @@ For proper results, the text should be tokenized. These tokenizers support Dutch
 
 Example using ucto:
 
-	$ ucto -L en -n -s '' "CONRAD, Joseph - Lord Jim.txt" | python readability.py
+	$ ucto -L en -n -s '' "CONRAD, Joseph - Lord Jim.txt" | readability
+	[...]
 	readability grades:
 		Kincaid:                     4.95
 		ARI:                         5.78
-		ColemanLiauIndex:            6.87
+		Coleman-Liau:                6.87
 		FleschReadingEase:          86.18
 		GunningFogIndex:             9.4
 		LIX:                        30.97
 		SMOGIndex:                   9.2
 		RIX:                         2.39
 	sentence info:
-		chars_per_word:              4.19
+		characters_per_word:         4.19
 		syll_per_word:               1.25
-		words_per_sent:             14.92
-		sent_per_paragraph:         12.6
+		words_per_sentence:         14.92
+		sentences_per_paragraph:        12.6
 		characters:             552074
 		syllables:              164207
 		words:                  131668
@@ -77,7 +78,6 @@ Example using ucto:
 		subordination:             124
 		conjunction:               240
 		preposition:               404
-
 
 References
 ----------
