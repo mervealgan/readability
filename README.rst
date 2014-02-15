@@ -17,11 +17,13 @@ outcomes are only meaningful for English texts.
 Installation
 ------------
 ::
+
     $ pip install https://github.com/andreasvc/readability/tarball/master
 
 Usage
 -----
 ::
+
     $ readability --help
     Simple readability measures.
 
