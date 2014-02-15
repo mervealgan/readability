@@ -11,6 +11,9 @@ this version supports UTF-8 encoded text, but expects sentence-segmented and
 tokenized text. The syllabification and word type recognition is based on
 simple heuristics and only provides a rough measure.
 
+NB: all readability formulas were developed for English, so the scales of the
+outcomes are only meaningful for English texts.
+
 Installation
 ------------
 
@@ -31,7 +34,12 @@ Usage
 	  -L, --lang=<x>   set language (available: de, nl, en).
 
 
-For proper results, the text should be tokenized, for example using [ucto](http://ilk.uvt.nl/ucto):
+For proper results, the text should be tokenized. These tokenizers support Dutch and English:
+
+- ucto: http://ilk.uvt.nl/ucto
+- elephant: http://gmb.let.rug.nl/elephant/
+
+Example using ucto:
 
 	$ ucto -L en -n -s '' "CONRAD, Joseph - Lord Jim.txt" | python readability.py
 	readability grades:
@@ -90,6 +98,8 @@ For better readability measures, consider the following:
   Proc. of ACL, pp. 523-530. http://www.aclweb.org/anthology/P05-1065.pdf
 - The Lexile framework for reading. http://www.lexile.com
 - Coh-Metrix. http://cohmetrix.memphis.edu/
+- Stylene: http://www.clips.ua.ac.be/category/projects/stylene
+- T-Scan: http://languagelink.let.uu.nl/tscan
 
 Acknowledgments
 ---------------
