@@ -105,10 +105,6 @@ For better readability measures, consider the following:
 
 Acknowledgments
 ---------------
-The code is based on:
+The code is based on: https://github.com/mmautner/readability
 
-    https://github.com/mmautner/readability
-
-Which in turn was based on:
-
-    https://github.com/nltk/nltk_contrib/tree/master/nltk_contrib/readability
+Which in turn was based on: https://github.com/nltk/nltk_contrib/tree/master/nltk_contrib/readability
