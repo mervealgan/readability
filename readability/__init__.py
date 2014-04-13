@@ -170,11 +170,14 @@ def main():
 		raise ValueError('expected 0 or 1 file argument.')
 
 	lang = opts.get('--lang', opts.get('-L', 'en'))
-	for cat, data in getmeasures(text, lang).items():
-		print(cat + ':')
-		for key, val in data.items():
-			print(('    %-20s %12.2f' % (key + ':', val)
-					).rstrip('0 ').rstrip('.'))
+	try:
+		for cat, data in getmeasures(text, lang).items():
+			print(cat + ':')
+			for key, val in data.items():
+				print(('    %-20s %12.2f' % (key + ':', val)
+						).rstrip('0 ').rstrip('.'))
+	except KeyboardInterrupt:
+		sys.exit(1)
 
 if __name__ == "__main__":
 	main()

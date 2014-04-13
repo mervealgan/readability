@@ -298,9 +298,76 @@ beginnings_nl = collections.OrderedDict([
 		'(^|\\n)(%s)\\b' % preposition_nl, re.IGNORECASE)),
 	])
 
-# TODO:
-words_de = dict()
-beginnings_de = dict()
+conjuction_de = ('und|oder|aber|sondern|doch|nur|bloß|denn'
+		'weder|noch|sowie')
+preposition_de = (
+	'aus|außer|bei|mit|nach|seit|von|zu'
+	'|bis|durch|für|gegen|ohne|um|an|auf'
+	'|hinter|in|neben|über|unter|vor|zwischen'
+	'|anstatt|statt|trotz|während|wegen')
+pronoun_de = (
+	'ich|du|er|sie|es|wir|ihr'  # sie           # Nominativ
+	'|mich|dich|ihn|uns|euch'  # sie             # Akkusativ
+	'|mir|dir|ihm|ihnen'  # uns euch ihr         # Dativ
+	'|mein|dein|sein|unser|euer'  # ihr          # Genitiv
+	'|meiner|deiner|seiner|unserer|eurer|ihrer'  # Genitiv
+	'|meine|deine|seine|unsere|eure|ihre'        # Genitiv
+	'|meines|deines|seines|unseres|eures|ihres'  # Genitiv
+	'|meinem|deinem|seinem|unserem|eurem|ihrem'  # Genitiv
+	'|meinen|deinen|seinen|unseren|euren|ihren'  # Genitiv
+		)
+words_de = collections.OrderedDict([
+	('tobeverb', re.compile("\\b("
+		"sein|bin|bist|ist|sind|seid|war|warst|wart"
+		"|waren|gewesen|wäre|wärst|wär|wären|wärt|wäret"
+		")\\b", re.IGNORECASE)),
+	('auxverb', re.compile("\\b("
+		"haben|habe|hast|hat|habt|gehabt|hätte|hättest"
+		"|hätten|hättet"
+		"|werden|werde|wirst|wird|werdet|geworden|würde"
+		"|würdest|würden|würdet"
+		"|können|kann|kannst|könnt|konnte|konntest|konnten"
+		"|konntet|gekonnt|könnte|könntest|könnten|könntet"
+		"|müssen|muss|muß|musst|müsst|musste|musstest|mussten"
+		"|gemusst|müsste|müsstest|müssten|müsstet"
+		"|sollen|soll|sollst|sollt|sollte|solltest|solltet"
+		"|sollten|gesollt"
+		")\\b", re.IGNORECASE)),
+	('conjunction', re.compile(
+		'\\b(%s)\\b' % conjuction_de, re.IGNORECASE)),
+	('pronoun', re.compile(
+		'\\b(%s)\\b' % pronoun_de, re.IGNORECASE)),
+	('preposition', re.compile(
+		'\\b(%s)\\b' % preposition_de, re.IGNORECASE)),
+	('nominalization', re.compile(
+		r'\b.{3,}(ung|heit|keit|nis|tum)\b', re.IGNORECASE)),
+	])
+beginnings_de = collections.OrderedDict([
+	('pronoun', re.compile(
+		'(^|\\n)(%s)\\b' % pronoun_de, re.IGNORECASE)),
+	('interrogative', re.compile(
+		r'(^|\n)(wer|was|wem|wen|wessen|wo|wie|warum|weshalb|wann'
+		r'|wieso|weswegen)\b', re.IGNORECASE)),
+	('article', re.compile(
+		r"(^|\n)(der|die|das|des|dem|den|ein|eine|einer|eines|einem|einen)\b",
+		re.IGNORECASE)),
+	('subordination', re.compile("(^|\\n)("
+		# bei Nebensätzen
+		"als|als dass|als daß|als ob|anstatt dass|anstatt daß"
+		"|ausser dass|ausser daß|ausser wenn|bevor|bis|da|damit"
+		"|dass|daß|ehe|falls|indem|je|nachdem|ob|obgleich"
+		"|obschon|obwohl|ohne dass|ohne daß|seit|so daß|sodass"
+		"|sobald|sofern|solange|so oft|statt dass|statt daß"
+		"|während|weil|wenn|wenn auch|wenngleich|wie|wie wenn"
+		"|wiewohl|wobei|wohingegen|zumal"
+		# bei Infinitivgruppen
+		"|als zu|anstatt zu|ausser zu|ohne zu|statt zu|um zu"
+		")\\b", re.IGNORECASE)),
+	('conjunction', re.compile(
+		'(^|\\n)(%s)\\b' % conjuction_de, re.IGNORECASE)),
+	('preposition', re.compile(
+		'(^|\\n)(%s)\\b' % preposition_de, re.IGNORECASE)),
+	])
 
 LANGDATA = dict(
 		en=dict(
