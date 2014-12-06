@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import re
 import collections
 
-VOWELS = 'aoeuiaäeioöuüëéèàiï'  # y is special case; true for en.
+VOWELS = 'aoeuiäàâáåãëéèêóòöôõðùúüìíïî'  # y is special case; true for en.
 
 specialSyllables_en = """\
 tottered 2
@@ -108,9 +108,8 @@ def countsyllables_en(word):
 		return 0
 
 	# Check for a cached syllable count
-	result = fallback_cache.get(word, -1)
-	if result > 0:
-		return result
+	if word in fallback_cache:
+		return fallback_cache[word]
 
 	# Remove final silent 'e'
 	if word[-1] == "e":

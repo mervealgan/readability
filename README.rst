@@ -27,14 +27,17 @@ Usage
     $ readability --help
     Simple readability measures.
 
-    Usage: readability.py [--lang=<x>] [file]
+    Usage: readability [--lang=<x>] [FILE]
+    or: readability [--lang=<x>] --csv FILES...
 
     By default, input is read from standard input.
     Text should be encoded with UTF-8,
     one sentence per line, tokens space-separated.
 
-      -L, --lang=<x>   set language (available: de, nl, en).
-
+    Options:
+      -L, --lang=<x>   Set language (available: de, nl, en).
+      --csv            Produce a table in comma separated value format on
+                       standard output given one or more filenames.
 
 For proper results, the text should be tokenized. These tokenizers support Dutch and English:
 

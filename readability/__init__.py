@@ -1,13 +1,17 @@
 """Simple readability measures.
 
-Usage: %s [--lang=<x>] [file]
+Usage: %(cmd)s [--lang=<x>] [FILE]
+or: %(cmd)s [--lang=<x>] --csv FILES...
 
 By default, input is read from standard input.
 Text should be encoded with UTF-8,
 one sentence per line, tokens space-separated.
 
 Options:
-  -L, --lang=<x>   set language (available: %s)."""
+  -L, --lang=<x>   Set language (available: %(lang)s).
+  --csv            Produce a table in comma separated value format on
+                   standard output given one or more filenames."""
+
 from __future__ import division, print_function, unicode_literals
 import io
 import os
@@ -19,10 +23,10 @@ import getopt
 import collections
 from readability.langdata import LANGDATA
 
-PUNCT = re.compile(r"^\W+$", re.UNICODE)
+TOKENRE = re.compile(r"\b[-\w]+\b", re.UNICODE)
 
 
-def getmeasures(text, lang='en'):
+def getmeasures(text, lang='en', merge=False):
 	"""Collect surface characteristics of a tokenized text.
 
 	>>> text = "A tokenized sentence .\\nAnother sentence ."
@@ -34,6 +38,8 @@ def getmeasures(text, lang='en'):
 		of space separated tokens.
 	:param lang: a language code to select the syllabification procedure and
 		word types to count.
+	:param merge: if ``True``, return a dictionary results into a single
+		dictionary of key-value pairs.
 	:returns: a two-level ordered dictionary with measurements."""
 	characters = 0
 	words = 0
@@ -56,9 +62,7 @@ def getmeasures(text, lang='en'):
 		if not sent:
 			paragraphs += 1
 		sentences += 1
-		for token in sent.split():
-			if PUNCT.match(token):
-				continue
+		for token in TOKENRE.findall(sent):
 			words += 1
 			characters += len(token)
 			syll = syllcounter(token)
@@ -73,7 +77,8 @@ def getmeasures(text, lang='en'):
 				complex_words += 1
 
 		for name, regexp in wordusageregexps.items():
-			wordusage[name] += sum(1 for _ in regexp.finditer(sent))
+			# wordusage[name] += sum(1 for _ in regexp.finditer(sent))
+			wordusage[name] += len(regexp.findall(sent))
 		for name, regexp in beginningsregexps.items():
 			beginnings[name] += regexp.match(sent) is not None
 
@@ -107,12 +112,29 @@ def getmeasures(text, lang='en'):
 			('RIX', RIX(long_words, sentences)),
 		])
 
+	if merge:
+		readability.update(stats)
+		readability.update(wordusage)
+		readability.update(beginnings)
+		return readability
 	return collections.OrderedDict([
 		('readability grades', readability),
 		('sentence info', stats),
 		('word usage', wordusage),
 		('sentence beginnings', beginnings),
 		])
+
+
+def getdataframe(filenames, lang='en', encoding='utf8'):
+	"""Return a pandas DataFrame with readability measures for a list of files.
+	"""
+	import pandas
+	filenames = list(filenames)
+	return pandas.DataFrame([getmeasures(
+				io.open(name, encoding=encoding),
+				lang=lang,
+				merge=True)
+			for name in filenames], index=filenames)
 
 
 def KincaidGradeLevel(syllables, words, sentences):
@@ -150,17 +172,22 @@ def RIX(long_words, sentences):
 
 def main():
 	shortoptions = 'hL:'
-	options = 'help lang='.split()
+	options = 'help csv lang='.split()
 	cmd = os.path.basename(sys.argv[0])
+	usage = __doc__ % dict(cmd=cmd, lang=', '.join(LANGDATA))
 	try:
 		opts, args = getopt.gnu_getopt(sys.argv[1:], shortoptions, options)
 	except getopt.GetoptError as err:
-		print('error: %r\n%s' % (err, __doc__ % (
-				cmd, ', '.join(LANGDATA))))
+		print('error: %r\n%s' % (err, usage))
 		sys.exit(2)
 	opts = dict(opts)
+	lang = opts.get('--lang', opts.get('-L', 'en'))
+
 	if '--help' in opts or '-h' in opts:
-		print(__doc__ % (cmd, ', '.join(LANGDATA)))
+		print(usage)
+		return
+	if '--csv' in opts:
+		getdataframe(args, lang=lang).to_csv(sys.stdout)
 		return
 	if len(args) == 0:
 		text = codecs.getreader('utf-8')(sys.stdin)
@@ -169,7 +196,6 @@ def main():
 	else:
 		raise ValueError('expected 0 or 1 file argument.')
 
-	lang = opts.get('--lang', opts.get('-L', 'en'))
 	try:
 		for cat, data in getmeasures(text, lang).items():
 			print(cat + ':')
