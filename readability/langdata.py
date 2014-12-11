@@ -253,15 +253,15 @@ words_nl = collections.OrderedDict([
 		# with past perfect verb
 		"heb|hebt|heeft|hebben|had|hadden"
 		"|word|wordt|worden|werd|werden"
-		#"|ben|bent|is|zijn|was|waren"
+		# "|ben|bent|is|zijn|was|waren"
 		# with infinitive
 		"|zal|zult|zullen|zou|zouden"
 		"|kan|kan|kunt|kunnen|kon|konden"
 		"|wil|wilt|willen|wilde|wilden|wou|wouden"
 		"|moet|moeten|moest|moesten"
-		#"|mag|mogen|mocht|mochten"
-		#"|hoef|hoeft|hoeven|hoefde|hoefden"
-		#"|doe|doet|doen|deed|deden"
+		# "|mag|mogen|mocht|mochten"
+		# "|hoef|hoeft|hoeven|hoefde|hoefden"
+		# "|doe|doet|doen|deed|deden"
 		")\\b", re.IGNORECASE)),
 	('conjunction', re.compile(
 		'\\b(%s)\\b' % conjuction_nl, re.IGNORECASE)),

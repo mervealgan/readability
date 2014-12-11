@@ -22,20 +22,24 @@ import codecs
 import getopt
 import collections
 from readability.langdata import LANGDATA
+if sys.version[0] >= '3':
+	unicode = str  # pylint: disable=invalid-name,redefined-builtin
 
-TOKENRE = re.compile(r"\b[-\w]+\b", re.UNICODE)
+WORDRE = re.compile(r"\b[-\w]+\b", re.UNICODE)
+PARARE = re.compile('\n\n+')
+SENTRE = re.compile('[^\n]+(\n|$)')
 
 
-def getmeasures_iter(text, lang='en', merge=False):
+def getmeasures(text, lang='en', merge=False):
 	"""Collect surface characteristics of a tokenized text.
 
 	>>> text = "A tokenized sentence .\\nAnother sentence ."
-	>>> result = getmeasures_iter(text.splitlines())
+	>>> result = getmeasures_str(text)
 	>>> result['sentence info']['words'] == 5
 	True
 
-	:param text: an iterable returning lines, one sentence per line
-		of space separated tokens.
+	:param text: a single string or a an iterable returning lines,
+		one sentence per line of space separated tokens.
 	:param lang: a language code to select the syllabification procedure and
 		word types to count.
 	:param merge: if ``True``, return a dictionary results into a single
@@ -57,19 +61,14 @@ def getmeasures_iter(text, lang='en', merge=False):
 	beginnings = collections.OrderedDict([(name, 0) for name, regexp
 			in beginningsregexps.items()])
 
-	prevempty = True
-	for sent in text:
-		sent = sent.strip()
-
-		if prevempty and sent:
-			paragraphs += 1
-		elif not sent:
-			prevempty = True
-			continue
-		prevempty = False
-
-		sentences += 1
-		for token in TOKENRE.findall(sent):
+	if isinstance(text, unicode):
+		# Collect surface characteristics from a string.
+		# NB: only recognizes UNIX newlines.
+		paragraphs = sum(1 for _ in PARARE.finditer(text)) + 1
+		sentences = sum(1 for _ in SENTRE.finditer(text))
+		# paragraphs = text.count('\n\n')
+		# sentences = text.count('\n') - paragraphs
+		for token in WORDRE.findall(text):
 			words += 1
 			characters += len(token)
 			syll = syllcounter(token)
@@ -84,104 +83,40 @@ def getmeasures_iter(text, lang='en', merge=False):
 				complex_words += 1
 
 		for name, regexp in wordusageregexps.items():
-			wordusage[name] += sum(1 for _ in regexp.finditer(sent))
+			wordusage[name] += sum(1 for _ in regexp.finditer(text))
 		for name, regexp in beginningsregexps.items():
-			beginnings[name] += regexp.match(sent) is not None
+			beginnings[name] += sum(1 for _ in regexp.finditer(text))
+	else:  # Collect surface characteristics from an iterable.
+		prevempty = True
+		for sent in text:
+			sent = sent.strip()
 
-	if not words:
-		raise ValueError("I can't do this, there's no words there!")
+			if prevempty and sent:
+				paragraphs += 1
+			elif not sent:
+				prevempty = True
+				continue
+			prevempty = False
 
-	stats = collections.OrderedDict([
-			('characters_per_word', characters / words),
-			('syll_per_word', syllables / words),
-			('words_per_sentence', words / sentences),
-			('sentences_per_paragraph', sentences / paragraphs),
-			('characters', characters),
-			('syllables', syllables),
-			('words', words),
-			('sentences', sentences),
-			('paragraphs', paragraphs),
-			('long_words', long_words),
-			('complex_words', complex_words),
-		])
-	readability = collections.OrderedDict([
-			('Kincaid', KincaidGradeLevel(syllables, words, sentences)),
-			('ARI', ARI(characters, words, sentences)),
-			('Coleman-Liau',
-				ColemanLiauIndex(characters, words, sentences)),
-			('FleschReadingEase',
-				FleschReadingEase(syllables, words, sentences)),
-			('GunningFogIndex',
-				GunningFogIndex(words, complex_words, sentences)),
-			('LIX', LIX(words, long_words, sentences)),
-			('SMOGIndex', SMOGIndex(complex_words, sentences)),
-			('RIX', RIX(long_words, sentences)),
-		])
+			sentences += 1
+			for token in WORDRE.findall(sent):
+				words += 1
+				characters += len(token)
+				syll = syllcounter(token)
+				syllables += syll
+				if len(token) >= 7:
+					long_words += 1
 
-	if merge:
-		readability.update(stats)
-		readability.update(wordusage)
-		readability.update(beginnings)
-		return readability
-	return collections.OrderedDict([
-		('readability grades', readability),
-		('sentence info', stats),
-		('word usage', wordusage),
-		('sentence beginnings', beginnings),
-		])
+				# This method could be improved. At the moment it only
+				# considers the number of syllables in a word. This often
+				# results in that too many complex words are detected.
+				if syll >= 3 and not token[0].isupper():  # ignore proper nouns
+					complex_words += 1
 
-
-def getmeasures_str(text, lang='en', merge=False):
-	"""Collect surface characteristics of a tokenized text.
-
-	>>> text = "A tokenized sentence .\\nAnother sentence ."
-	>>> result = getmeasures_str(text)
-	>>> result['sentence info']['words'] == 5
-	True
-
-	:param text: a string with one sentence per line
-		of space separated tokens.
-	:param lang: a language code to select the syllabification procedure and
-		word types to count.
-	:param merge: if ``True``, return a dictionary results into a single
-		dictionary of key-value pairs.
-	:returns: a two-level ordered dictionary with measurements."""
-	characters = 0
-	words = 0
-	syllables = 0
-	complex_words = 0
-	long_words = 0
-	syllcounter = LANGDATA[lang]['syllables']
-	wordusageregexps = LANGDATA[lang]['words']
-	beginningsregexps = LANGDATA[lang]['beginnings']
-
-	wordusage = collections.OrderedDict([(name, 0) for name, regexp
-			in wordusageregexps.items()])
-	beginnings = collections.OrderedDict([(name, 0) for name, regexp
-			in beginningsregexps.items()])
-
-	paragraphs = sum(1 for _ in re.compile('\n\n+').finditer(text)) + 1
-	sentences = sum(1 for _ in re.compile('[^\n]+(\n|$)').finditer(text))
-	# paragraphs = text.count('\n\n')
-	# sentences = text.count('\n') - paragraphs
-	for token in TOKENRE.findall(text):
-		words += 1
-		characters += len(token)
-		syll = syllcounter(token)
-		syllables += syll
-		if len(token) >= 7:
-			long_words += 1
-
-		# This method could be improved. At the moment it only
-		# considers the number of syllables in a word. This often
-		# results in that too many complex words are detected.
-		if syll >= 3 and not token[0].isupper():  # ignore proper nouns
-			complex_words += 1
-
-	for name, regexp in wordusageregexps.items():
-		wordusage[name] += sum(1 for _ in regexp.finditer(text))
-	for name, regexp in beginningsregexps.items():
-		beginnings[name] += sum(1 for _ in regexp.finditer(text))
+			for name, regexp in wordusageregexps.items():
+				wordusage[name] += sum(1 for _ in regexp.finditer(sent))
+			for name, regexp in beginningsregexps.items():
+				beginnings[name] += regexp.match(sent) is not None
 
 	if not words:
 		raise ValueError("I can't do this, there's no words there!")
@@ -231,7 +166,7 @@ def getdataframe(filenames, lang='en', encoding='utf8'):
 	"""
 	import pandas
 	filenames = list(filenames)
-	return pandas.DataFrame([getmeasures_str(
+	return pandas.DataFrame([getmeasures(
 				io.open(name, encoding=encoding).read(),
 				lang=lang,
 				merge=True)
@@ -284,26 +219,22 @@ def main():
 	opts = dict(opts)
 	lang = opts.get('--lang', opts.get('-L', 'en'))
 
+	if '--help' in opts or '-h' in opts:
+		print(usage)
+		return
+	elif '--csv' in opts:
+		result = getdataframe(args, lang=lang)
+		result.to_csv(sys.stdout)
+		return
+	elif len(args) == 0:
+		text = codecs.getreader('utf-8')(sys.stdin)
+	elif len(args) == 1:
+		text = io.open(args[0], encoding='utf-8').read()
+	else:
+		raise ValueError('expected 0 or 1 file argument.')
 	try:
-		if '--help' in opts or '-h' in opts:
-			print(usage)
-			return
-		elif '--csv' in opts:
-			result = getdataframe(args, lang=lang)
-			result.to_csv(sys.stdout)
-			return
-		elif len(args) == 0:
-			result = getmeasures_iter(
-					codecs.getreader('utf-8')(sys.stdin),
-					lang)
-		elif len(args) == 1:
-			result = getmeasures_str(
-					io.open(args[0], encoding='utf-8').read(),
-					lang)
-		else:
-			raise ValueError('expected 0 or 1 file argument.')
-		for cat, data in result.items():
-			print(cat + ':')
+		for cat, data in getmeasures(text, lang).items():
+			print('%s:' % cat)
 			for key, val in data.items():
 				print(('    %-20s %12.2f' % (key + ':', val)
 						).rstrip('0 ').rstrip('.'))
