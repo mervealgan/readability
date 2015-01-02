@@ -38,7 +38,7 @@ def getmeasures(text, lang='en', merge=False):
 	>>> result['sentence info']['words'] == 5
 	True
 
-	:param text: a single string or a an iterable returning lines,
+	:param text: a single unicode string or an iterable of lines,
 		one sentence per line of space separated tokens.
 	:param lang: a language code to select the syllabification procedure and
 		word types to count.
@@ -61,7 +61,9 @@ def getmeasures(text, lang='en', merge=False):
 	beginnings = collections.OrderedDict([(name, 0) for name, regexp
 			in beginningsregexps.items()])
 
-	if isinstance(text, unicode):
+	if isinstance(text, bytes):
+		raise ValueError('Expected: unicode string or an iterable of lines')
+	elif isinstance(text, unicode):
 		# Collect surface characteristics from a string.
 		# NB: only recognizes UNIX newlines.
 		paragraphs = sum(1 for _ in PARARE.finditer(text)) + 1
