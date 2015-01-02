@@ -34,7 +34,7 @@ def getmeasures(text, lang='en', merge=False):
 	"""Collect surface characteristics of a tokenized text.
 
 	>>> text = "A tokenized sentence .\\nAnother sentence ."
-	>>> result = getmeasures_str(text)
+	>>> result = getmeasures(text)
 	>>> result['sentence info']['words'] == 5
 	True
 
