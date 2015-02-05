@@ -38,11 +38,17 @@ Usage
       -L, --lang=<x>   Set language (available: de, nl, en).
       --csv            Produce a table in comma separated value format on
                        standard output given one or more filenames.
+      --tokenizer=<x>  Specify a tokenizer including options that will be given
+                       each text on stdin and should return tokenized output on
+                       stdout. Not applicable when reading from stdin.
 
-For proper results, the text should be tokenized. These tokenizers support Dutch and English:
+For proper results, the text should be tokenized.
 
-- ``ucto``: http://ilk.uvt.nl/ucto
-- ``elephant``: http://gmb.let.rug.nl/elephant/
+- For English, I recommend "tokenizer",
+  cf. http://moin.delph-in.net/WeSearch/DocumentParsing
+- For Dutch, I recommend the tokenizer that is part of the Alpino parser:
+  http://www.let.rug.nl/vannoord/alp/Alpino/.
+- ``ucto`` is a  general multilingual tokenizer: http://ilk.uvt.nl/ucto
 
 Example using ``ucto``::
 
@@ -83,6 +89,12 @@ Example using ``ucto``::
         subordination:             124
         conjunction:               240
         preposition:               404
+
+The option ``--csv`` collects readability measures for a number of texts in
+a table. To tokenize documents on-the-fly when using this option, use
+the ``--tokenizer`` option. Example with the "tokenize" tool::
+
+    $ readability --csv --tokenizer='tokenizer -L en-u8 -P -S -E "" -N' */*.txt >readabilitymeasures.csv
 
 References
 ----------

@@ -10,7 +10,10 @@ one sentence per line, tokens space-separated.
 Options:
   -L, --lang=<x>   Set language (available: %(lang)s).
   --csv            Produce a table in comma separated value format on
-                   standard output given one or more filenames."""
+                   standard output given one or more filenames.
+  --tokenizer=<x>  Specify a tokenizer including options that will be given
+                   each text on stdin and should return tokenized output on
+                   stdout. Not applicable when reading from stdin."""
 
 from __future__ import division, print_function, unicode_literals
 import io
@@ -20,6 +23,7 @@ import sys
 import math
 import codecs
 import getopt
+import subprocess
 import collections
 from readability.langdata import LANGDATA
 if sys.version[0] >= '3':
@@ -163,16 +167,30 @@ def getmeasures(text, lang='en', merge=False):
 		])
 
 
-def getdataframe(filenames, lang='en', encoding='utf8'):
+def getdataframe(filenames, lang='en', encoding='utf8', tokenizer=None):
 	"""Return a pandas DataFrame with readability measures for a list of files.
 	"""
 	import pandas
 	filenames = list(filenames)
+
 	return pandas.DataFrame([getmeasures(
-				io.open(name, encoding=encoding).read(),
+				applytokenizer(name, tokenizer, encoding),
 				lang=lang,
 				merge=True)
 			for name in filenames], index=filenames)
+
+
+def applytokenizer(filename, tokenizer, encoding):
+	"""Run the tokenizer command on a file, if given, and return text."""
+	if tokenizer is None:
+		return io.open(filename, encoding=encoding).read()
+	proc = subprocess.Popen(
+			tokenizer.split(),
+			stdin=subprocess.PIPE,
+			stdout=subprocess.PIPE,
+			stderr=subprocess.PIPE)
+	out, _err = proc.communicate(open(filename).read())
+	return out.decode(encoding)
 
 
 def KincaidGradeLevel(syllables, words, sentences):
@@ -210,7 +228,7 @@ def RIX(long_words, sentences):
 
 def main():
 	shortoptions = 'hL:'
-	options = 'help csv lang='.split()
+	options = 'help csv lang= tokenizer='.split()
 	cmd = os.path.basename(sys.argv[0])
 	usage = __doc__ % dict(cmd=cmd, lang=', '.join(LANGDATA))
 	try:
@@ -225,13 +243,14 @@ def main():
 		print(usage)
 		return
 	elif '--csv' in opts:
-		result = getdataframe(args, lang=lang)
+		result = getdataframe(args, lang=lang,
+				tokenizer=opts.get('--tokenizer'))
 		result.to_csv(sys.stdout)
 		return
 	elif len(args) == 0:
-		text = codecs.getreader('utf-8')(sys.stdin)
+		text = codecs.getreader('utf8')(sys.stdin)
 	elif len(args) == 1:
-		text = io.open(args[0], encoding='utf-8').read()
+		text = applytokenizer(args[0], opts.get('--tokenizer'), 'utf8')
 	else:
 		raise ValueError('expected 0 or 1 file argument.')
 	try:
@@ -242,6 +261,9 @@ def main():
 						).rstrip('0 ').rstrip('.'))
 	except KeyboardInterrupt:
 		sys.exit(1)
+
+
+__all__ = ['getmeasures', 'getdataframe']
 
 if __name__ == "__main__":
 	main()
