@@ -56,6 +56,7 @@ def getmeasures(text, lang='en', merge=False):
 	long_words = 0
 	paragraphs = 0
 	sentences = 0
+	vocabulary = set()
 	syllcounter = LANGDATA[lang]['syllables']
 	wordusageregexps = LANGDATA[lang]['words']
 	beginningsregexps = LANGDATA[lang]['beginnings']
@@ -75,6 +76,7 @@ def getmeasures(text, lang='en', merge=False):
 		# paragraphs = text.count('\n\n')
 		# sentences = text.count('\n') - paragraphs
 		for token in WORDRE.findall(text):
+			vocabulary.add(token)
 			words += 1
 			characters += len(token)
 			syll = syllcounter(token)
@@ -87,6 +89,7 @@ def getmeasures(text, lang='en', merge=False):
 			# results in that too many complex words are detected.
 			if syll >= 3 and not token[0].isupper():  # ignore proper nouns
 				complex_words += 1
+
 
 		for name, regexp in wordusageregexps.items():
 			wordusage[name] += sum(1 for _ in regexp.finditer(text))
@@ -106,6 +109,7 @@ def getmeasures(text, lang='en', merge=False):
 
 			sentences += 1
 			for token in WORDRE.findall(sent):
+				vocabulary.add(token)
 				words += 1
 				characters += len(token)
 				syll = syllcounter(token)
@@ -132,9 +136,11 @@ def getmeasures(text, lang='en', merge=False):
 			('syll_per_word', syllables / words),
 			('words_per_sentence', words / sentences),
 			('sentences_per_paragraph', sentences / paragraphs),
+			('type_token_ratio', len(vocabulary) / words),
 			('characters', characters),
 			('syllables', syllables),
 			('words', words),
+			('wordtypes', len(vocabulary)),
 			('sentences', sentences),
 			('paragraphs', paragraphs),
 			('long_words', long_words),
