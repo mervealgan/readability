@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
 	name='readability',
-	version='0.1',
+	version='0.2',
 	description=('Measure the readability of a given text '
 		'using surface characteristics'),
 	long_description=open('README.rst').read(),
