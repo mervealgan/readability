@@ -18,7 +18,10 @@ Options:
 from __future__ import division, print_function, unicode_literals
 import io
 import os
-import re
+try:
+	import re2 as re
+except ImportError:
+	import re
 import sys
 import math
 import codecs
