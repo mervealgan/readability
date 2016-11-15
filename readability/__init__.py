@@ -24,7 +24,6 @@ except ImportError:
 	import re
 import sys
 import math
-import codecs
 import getopt
 import subprocess
 import collections
@@ -256,8 +255,8 @@ def main():
 				tokenizer=opts.get('--tokenizer'))
 		result.to_csv(sys.stdout)
 		return
-	elif len(args) == 0:
-		text = codecs.getreader('utf8')(sys.stdin)
+	elif len(args) == 0 or args == ['-']:
+		text = io.TextIOWrapper(sys.stdin.buffer, encoding='utf8')
 	elif len(args) == 1:
 		text = applytokenizer(args[0], opts.get('--tokenizer'), 'utf8')
 	else:
