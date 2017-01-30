@@ -28,6 +28,7 @@ import getopt
 import subprocess
 import collections
 from readability.langdata import LANGDATA
+from readability.langdata import BASIC_WORDS_DC
 if sys.version[0] >= '3':
 	unicode = str  # pylint: disable=invalid-name,redefined-builtin
 
@@ -55,6 +56,7 @@ def getmeasures(text, lang='en', merge=False):
 	words = 0
 	syllables = 0
 	complex_words = 0
+	complex_words_dc = 0
 	long_words = 0
 	paragraphs = 0
 	sentences = 0
@@ -91,6 +93,9 @@ def getmeasures(text, lang='en', merge=False):
 			# results in that too many complex words are detected.
 			if syll >= 3 and not token[0].isupper():  # ignore proper nouns
 				complex_words += 1
+                
+			if token.lower() not in BASIC_WORDS_DC:
+				complex_words_dc += 1
 
 
 		for name, regexp in wordusageregexps.items():
@@ -124,6 +129,9 @@ def getmeasures(text, lang='en', merge=False):
 				# results in that too many complex words are detected.
 				if syll >= 3 and not token[0].isupper():  # ignore proper nouns
 					complex_words += 1
+                
+				if token.lower() not in BASIC_WORDS_DC:
+					complex_words_dc += 1
 
 			for name, regexp in wordusageregexps.items():
 				wordusage[name] += sum(1 for _ in regexp.finditer(sent))
@@ -147,6 +155,7 @@ def getmeasures(text, lang='en', merge=False):
 			('paragraphs', paragraphs),
 			('long_words', long_words),
 			('complex_words', complex_words),
+            ('complex_words_dc', complex_words_dc),
 		])
 	readability = collections.OrderedDict([
 			('Kincaid', KincaidGradeLevel(syllables, words, sentences)),
@@ -160,6 +169,7 @@ def getmeasures(text, lang='en', merge=False):
 			('LIX', LIX(words, long_words, sentences)),
 			('SMOGIndex', SMOGIndex(complex_words, sentences)),
 			('RIX', RIX(long_words, sentences)),
+            ('DaleChallIndex', DaleChallIndex(words, complex_words_dc, sentences)),
 		])
 
 	if merge:
@@ -213,7 +223,6 @@ def ColemanLiauIndex(characters, words, sentences):
 	return (5.879851 * characters / words - 29.587280 * sentences / words
 			- 15.800804)
 
-
 def FleschReadingEase(syllables, words, sentences):
 	return 206.835 - 84.6 * (syllables / words) - 1.015 * (words / sentences)
 
@@ -232,6 +241,11 @@ def SMOGIndex(complex_words, sentences):
 
 def RIX(long_words, sentences):
 	return long_words / sentences
+    
+def DaleChallIndex(words, complex_words, sentences):
+    complex_words_prc = (complex_words/float(words)) * 100
+    return 0.1579*complex_words_prc + 0.0496*(words/float(sentences)) + \
+        3.6365 if complex_words_prc > 5 else 0
 
 
 def main():
