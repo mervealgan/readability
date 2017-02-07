@@ -1,18 +1,24 @@
 Readability
 ===========
 
-A collection of functions that measure the readability of a given body of text
-using surface characteristics. These measures are basically linear regressions
-based on the number of words, syllables, and sentences.
+An implementation of traditional readability measures based on simple surface
+characteristics. These measures are basically linear regressions based on the
+number of words, syllables, and sentences.
 
 The functionality is modeled after the UNIX ``style(1)`` command. Compared to the
 implementation as part of `GNU diction <http://www.moria.de/~michael/diction/>`_,
 this version supports UTF-8 encoded text, but expects sentence-segmented and
 tokenized text. The syllabification and word type recognition is based on
-simple heuristics and only provides a rough measure.
+simple heuristics and only provides a rough measure. The supported languages
+are English, German, and Dutch. Adding support for a new language involves the
+addition of heuristics for the aforementioned syllabification and word type
+recognition; see `langdata.py`.
 
 NB: all readability formulas were developed for English, so the scales of the
-outcomes are only meaningful for English texts.
+outcomes are only meaningful for English texts. The Dale-Chall measure uses the
+original word list for English, but for Dutch and German lists of frequent
+words are used that were not specifically selected for recognizability by
+school children.
 
 Installation
 ------------
@@ -106,6 +112,7 @@ The following readability metrics are included:
 4. http://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_test#Flesch_Reading_Ease
 5. http://en.wikipedia.org/wiki/Coleman-Liau_Index
 6. http://en.wikipedia.org/wiki/Gunning-Fog_Index
+7. https://en.wikipedia.org/wiki/Dale%E2%80%93Chall_readability_formula
 
 For better readability measures, consider the following:
 

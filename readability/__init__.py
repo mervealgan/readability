@@ -28,7 +28,6 @@ import getopt
 import subprocess
 import collections
 from readability.langdata import LANGDATA
-from readability.langdata import BASIC_WORDS_DC
 if sys.version[0] >= '3':
 	unicode = str  # pylint: disable=invalid-name,redefined-builtin
 
@@ -64,6 +63,7 @@ def getmeasures(text, lang='en', merge=False):
 	syllcounter = LANGDATA[lang]['syllables']
 	wordusageregexps = LANGDATA[lang]['words']
 	beginningsregexps = LANGDATA[lang]['beginnings']
+	basicwords = LANGDATA[lang].get('basicwords', set())
 
 	wordusage = collections.OrderedDict([(name, 0) for name, regexp
 			in wordusageregexps.items()])
@@ -88,15 +88,10 @@ def getmeasures(text, lang='en', merge=False):
 			if len(token) >= 7:
 				long_words += 1
 
-			# This method could be improved. At the moment it only
-			# considers the number of syllables in a word. This often
-			# results in that too many complex words are detected.
 			if syll >= 3 and not token[0].isupper():  # ignore proper nouns
 				complex_words += 1
-                
-			if token.lower() not in BASIC_WORDS_DC:
+			if token.lower() not in basicwords:
 				complex_words_dc += 1
-
 
 		for name, regexp in wordusageregexps.items():
 			wordusage[name] += sum(1 for _ in regexp.finditer(text))
@@ -124,13 +119,9 @@ def getmeasures(text, lang='en', merge=False):
 				if len(token) >= 7:
 					long_words += 1
 
-				# This method could be improved. At the moment it only
-				# considers the number of syllables in a word. This often
-				# results in that too many complex words are detected.
 				if syll >= 3 and not token[0].isupper():  # ignore proper nouns
 					complex_words += 1
-                
-				if token.lower() not in BASIC_WORDS_DC:
+				if token.lower() not in basicwords:
 					complex_words_dc += 1
 
 			for name, regexp in wordusageregexps.items():
@@ -155,7 +146,6 @@ def getmeasures(text, lang='en', merge=False):
 			('paragraphs', paragraphs),
 			('long_words', long_words),
 			('complex_words', complex_words),
-            ('complex_words_dc', complex_words_dc),
 		])
 	readability = collections.OrderedDict([
 			('Kincaid', KincaidGradeLevel(syllables, words, sentences)),
@@ -169,20 +159,22 @@ def getmeasures(text, lang='en', merge=False):
 			('LIX', LIX(words, long_words, sentences)),
 			('SMOGIndex', SMOGIndex(complex_words, sentences)),
 			('RIX', RIX(long_words, sentences)),
-            ('DaleChallIndex', DaleChallIndex(words, complex_words_dc, sentences)),
 		])
-
+	if basicwords:
+		stats['complex_words_dc'] = complex_words_dc
+		readability['DaleChallIndex'] = DaleChallIndex(
+				words, complex_words_dc, sentences)
 	if merge:
 		readability.update(stats)
 		readability.update(wordusage)
 		readability.update(beginnings)
 		return readability
 	return collections.OrderedDict([
-		('readability grades', readability),
-		('sentence info', stats),
-		('word usage', wordusage),
-		('sentence beginnings', beginnings),
-		])
+			('readability grades', readability),
+			('sentence info', stats),
+			('word usage', wordusage),
+			('sentence beginnings', beginnings),
+			])
 
 
 def getdataframe(filenames, lang='en', encoding='utf8', tokenizer=None):
@@ -241,11 +233,13 @@ def SMOGIndex(complex_words, sentences):
 
 def RIX(long_words, sentences):
 	return long_words / sentences
-    
-def DaleChallIndex(words, complex_words, sentences):
-    complex_words_prc = (complex_words/float(words)) * 100
-    return 0.1579*complex_words_prc + 0.0496*(words/float(sentences)) + \
-        3.6365 if complex_words_prc > 5 else 0
+
+
+def DaleChallIndex(words, complex_words_dc, sentences):
+	complex_prc = complex_words_dc / words * 100
+	if complex_prc <= 5:
+		return 0
+	return 0.1579 * complex_prc + 0.0496 * words / sentences + 3.6365
 
 
 def main():
