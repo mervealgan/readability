@@ -12,7 +12,7 @@ tokenized text. The syllabification and word type recognition is based on
 simple heuristics and only provides a rough measure. The supported languages
 are English, German, and Dutch. Adding support for a new language involves the
 addition of heuristics for the aforementioned syllabification and word type
-recognition; see `langdata.py`.
+recognition; see ``langdata.py``.
 
 NB: all readability formulas were developed for English, so the scales of the
 outcomes are only meaningful for English texts. The Dale-Chall measure uses the

@@ -273,7 +273,7 @@ def main():
 		for cat, data in getmeasures(text, lang).items():
 			print('%s:' % cat)
 			for key, val in data.items():
-				print(('    %-20s %12.2f' % (key + ':', val)
+				print(('    %-25s %12.2f' % (key + ':', val)
 						).rstrip('0 ').rstrip('.'))
 	except KeyboardInterrupt:
 		sys.exit(1)
