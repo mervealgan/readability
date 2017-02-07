@@ -61,40 +61,44 @@ Example using ``ucto``::
     $ ucto -L en -n -s '' "CONRAD, Joseph - Lord Jim.txt" | readability
     [...]
     readability grades:
-        Kincaid:                     4.95
-        ARI:                         5.78
-        Coleman-Liau:                6.87
-        FleschReadingEase:          86.18
-        GunningFogIndex:             9.4
-        LIX:                        30.97
-        SMOGIndex:                   9.2
-        RIX:                         2.39
+        Kincaid:                          5.44
+        ARI:                              6.39
+        Coleman-Liau:                     6.91
+        FleschReadingEase:               85.17
+        GunningFogIndex:                  9.86
+        LIX:                             31.98
+        SMOGIndex:                        9.39
+        RIX:                              2.56
+        DaleChallIndex:                   8.02
     sentence info:
-        characters_per_word:         4.19
-        syll_per_word:               1.25
-        words_per_sentence:         14.92
-        sentences_per_paragraph:        12.6
-        characters:             552074
-        syllables:              164207
-        words:                  131668
-        sentences:                8823
-        paragraphs:                700
-        long_words:              21122
-        complex_words:           11306
+        characters_per_word:              4.17
+        syll_per_word:                    1.24
+        words_per_sentence:              16.35
+        sentences_per_paragraph:         11.5
+        type_token_ratio:                 0.09
+        characters:                  551335
+        syllables:                   164205
+        words:                       132211
+        wordtypes:                    12071
+        sentences:                     8087
+        paragraphs:                     703
+        long_words:                   20670
+        complex_words:                10990
+        complex_words_dc:             29908
     word usage:
-        tobeverb:                 3909
-        auxverb:                  1632
-        conjunction:              4413
-        pronoun:                 18104
-        preposition:             19271
-        nominalization:           1216
+        tobeverb:                      3907
+        auxverb:                       1630
+        conjunction:                   4398
+        pronoun:                      18092
+        preposition:                  19290
+        nominalization:                1167
     sentence beginnings:
-        pronoun:                  2593
-        interrogative:             215
-        article:                   632
-        subordination:             124
-        conjunction:               240
-        preposition:               404
+        pronoun:                       2578
+        interrogative:                  217
+        article:                        629
+        subordination:                  120
+        conjunction:                    236
+        preposition:                    397
 
 The option ``--csv`` collects readability measures for a number of texts in
 a table. To tokenize documents on-the-fly when using this option, use
