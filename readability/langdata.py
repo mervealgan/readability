@@ -369,7 +369,7 @@ beginnings_de = collections.OrderedDict([
 	])
 
 # Long Dale-Chall word list of 3000 words recognized by 80 % of fifth graders
-basicwords_en = set("""
+basicwords_en = frozenset("""
 n't 'm 'll 'd 's 've
 a able aboard about above absent accept accident account
 ache aching acorn acre across act acts add address admire adventure afar afraid
@@ -617,7 +617,7 @@ yourselves youth you've
 """.lower().split())
 
 # 3000 most frequent word tokens in Sonar 500 corpus
-basicwords_nl = set("""
+basicwords_nl = frozenset("""
 . de , van het een en in dat is op te zijn voor met ik die niet ) ( : " maar er
 ' aan - ook je als om ? hij ze bij dan nog was naar uit of door we heeft over
 wat al tot worden meer hebben wordt geen wel jaar kan ! dit nu zich zo hun deze
@@ -904,7 +904,7 @@ aparte gepleegd
 """.split())
 
 # 1000 MFW German; http://www.wortschatz.uni-leipzig.de/Papers/top1000de.txt
-basicwords_de = set("""
+basicwords_de = frozenset("""
 der die und in den von zu das mit sich des auf für ist im dem nicht ein Die
 eine als auch es an werden aus er hat daß sie nach wird bei einer Der um am
 sind noch wie einem über einen Das so Sie zum war haben nur oder aber vor zur

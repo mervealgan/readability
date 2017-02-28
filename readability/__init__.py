@@ -63,7 +63,7 @@ def getmeasures(text, lang='en', merge=False):
 	syllcounter = LANGDATA[lang]['syllables']
 	wordusageregexps = LANGDATA[lang]['words']
 	beginningsregexps = LANGDATA[lang]['beginnings']
-	basicwords = LANGDATA[lang].get('basicwords', set())
+	basicwords = LANGDATA[lang].get('basicwords', frozenset())
 
 	wordusage = collections.OrderedDict([(name, 0) for name, regexp
 			in wordusageregexps.items()])
