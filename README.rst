@@ -28,7 +28,16 @@ Installation
 
 Usage
 -----
-::
+From Python::
+
+    >>> import readability
+    >>> text = ('This is an example sentence .\n'
+            'Note that tokens are separated by spaces and sentences by newlines .\n')
+    >>> results = readability.getmeasures(text, lang='en')
+    >>> print(results['readability grades']['FleschReadingEase'])
+    55.95250000000002
+
+Command line usage::
 
     $ readability --help
     Simple readability measures.
