@@ -107,13 +107,13 @@ def countsyllables_en(word):
 	if not word:
 		return 0
 
-	# Check for a cached syllable count
-	if word in fallback_cache:
-		return fallback_cache[word]
-
 	# Remove final silent 'e'
 	if word[-1] == "e":
 		word = word[:-1]
+
+	# Check for a cached syllable count
+	if word in fallback_cache:
+		return fallback_cache[word]
 
 	# Count vowel groups
 	result = 0
