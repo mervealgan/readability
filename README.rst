@@ -8,7 +8,7 @@ number of words, syllables, and sentences.
 The functionality is modeled after the UNIX ``style(1)`` command. Compared to the
 implementation as part of `GNU diction <http://www.moria.de/~michael/diction/>`_,
 this version supports UTF-8 encoded text, but expects sentence-segmented and
-tokenized text. The syllabification and word type recognition is based on
+word-tokenized text. The syllabification and word type recognition are based on
 simple heuristics and only provides a rough measure. The supported languages
 are English, German, and Dutch. Adding support for a new language involves the
 addition of heuristics for the aforementioned syllabification and word type
@@ -28,14 +28,28 @@ Installation
 
 Usage
 -----
-From Python::
+From Python; tokenization using [syntok](https://github.com/fnl/syntok)::
 
     >>> import readability
-    >>> text = ('This is an example sentence .\n'
-            'Note that tokens are separated by spaces and sentences by newlines .\n')
-    >>> results = readability.getmeasures(text, lang='en')
+    >>> import syntok.segmenter as segmenter
+    >>> text = """
+    This is an example sentence. Note that tokens will be separated by spaces
+    and sentences by newlines.
+
+    This is the second paragraph."""
+    >>> tokenized = '\n\n'.join(
+         '\n'.join(
+            ' '.join(token.value for token in sentence)
+            for sentence in paragraph)
+         for paragraph in segmenter.analyze(text))
+    >>> print(tokenized)
+    This is an example sentence .
+    Note that tokens will be separated by spaces and sentences by newlines .
+
+    This is the second paragraph .
+    >>> results = readability.getmeasures(tokenized, lang='en')
     >>> print(results['readability grades']['FleschReadingEase'])
-    55.95250000000002
+    68.64621212121216
 
 Command line usage::
 
