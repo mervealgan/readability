@@ -28,8 +28,9 @@ Installation
 
 Usage
 -----
-From Python; tokenization using [syntok](https://github.com/fnl/syntok)::
+From Python; tokenization using `syntok <https://github.com/fnl/syntok>`_:
 
+.. code:: python
     >>> import readability
     >>> import syntok.segmenter as segmenter
     >>> text = """
@@ -38,8 +39,7 @@ From Python; tokenization using [syntok](https://github.com/fnl/syntok)::
 
     This is the second paragraph."""
     >>> tokenized = '\n\n'.join(
-         '\n'.join(
-            ' '.join(token.value for token in sentence)
+         '\n'.join(' '.join(token.value for token in sentence)
             for sentence in paragraph)
          for paragraph in segmenter.analyze(text))
     >>> print(tokenized)
