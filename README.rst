@@ -31,6 +31,7 @@ Usage
 From Python; tokenization using `syntok <https://github.com/fnl/syntok>`_:
 
 .. code:: python
+
     >>> import readability
     >>> import syntok.segmenter as segmenter
     >>> text = """
