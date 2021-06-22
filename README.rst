@@ -20,6 +20,9 @@ original word list for English, but for Dutch and German lists of frequent
 words are used that were not specifically selected for recognizability by
 school children.
 
+NEW: for syntactic complexity measures,
+try [udstyle](https://gist.github.com/andreasvc/1fcdcbc2a21d31722facd98e5f02d19a/)
+
 Installation
 ------------
 ::
@@ -28,6 +31,14 @@ Installation
 
 Usage
 -----
+The following preprocessing is expected:
+
+- Tokens (words or punctuation) separated by space
+- One sentence per line; no line breaks within sentences
+- Paragraphs separated by one empty line
+
+The quality of preprocessing affects the validity of the results.
+
 From Python; tokenization using `syntok <https://github.com/fnl/syntok>`_:
 
 .. code:: python
@@ -72,9 +83,9 @@ Command line usage::
                        each text on stdin and should return tokenized output on
                        stdout. Not applicable when reading from stdin.
 
-For proper results, the text should be tokenized.
+Recommended tokenizers:
 
-- For English, I recommend "tokenizer",
+- For English and German, I recommend "tokenizer",
   cf. http://moin.delph-in.net/WeSearch/DocumentParsing
 - For Dutch, I recommend the tokenizer that is part of the Alpino parser:
   http://www.let.rug.nl/vannoord/alp/Alpino/.
@@ -82,7 +93,7 @@ For proper results, the text should be tokenized.
 
 Example using ``ucto``::
 
-    $ ucto -L en -n -s '' "CONRAD, Joseph - Lord Jim.txt" | readability
+    $ ucto -L en -n -s "''" "CONRAD, Joseph - Lord Jim.txt" | readability
     [...]
     readability grades:
         Kincaid:                          5.44
