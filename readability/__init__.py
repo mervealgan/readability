@@ -245,9 +245,10 @@ def RIX(long_words, sentences):
 
 def DaleChallIndex(words, complex_words_dc, sentences):
 	complex_prc = complex_words_dc / words * 100
+	score = 0.1579 * complex_prc + 0.0496 * words / sentences
 	if complex_prc <= 5:
-		return 0
-	return 0.1579 * complex_prc + 0.0496 * words / sentences + 3.6365
+		score += 3.6365
+	return score
 
 
 def main():
