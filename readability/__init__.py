@@ -92,7 +92,8 @@ def getmeasures(text, lang='en', merge=False):
 			if len(token) >= 7:
 				long_words += 1
 
-			if not token[0].isupper():  # ignore proper nouns
+			# ignore proper nouns and numbers
+			if not token[0].isupper() and not token.isdigit():
 				if syll >= 3:
 					complex_words += 1
 				if token.lower() not in basicwords:
@@ -125,7 +126,8 @@ def getmeasures(text, lang='en', merge=False):
 				if len(token) >= 7:
 					long_words += 1
 
-				if not token[0].isupper():  # ignore proper nouns
+				# ignore proper nouns and numbers
+				if not token[0].isupper() and not token.isdigit():
 					if syll >= 3:
 						complex_words += 1
 					if token.lower() not in basicwords:

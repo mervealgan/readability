@@ -370,7 +370,8 @@ beginnings_de = collections.OrderedDict([
 
 # Long Dale-Chall word list of 3000 words recognized by 80 % of fifth graders
 basicwords_en = frozenset("""
-n't 'm 'll 'd 's 've
+n't 'm 'll 'd 's 're 've
+t m ll d s re ve don shouldn aren didn hadn hasn haven isn needn shan wasn
 a able aboard about above absent accept accident account
 ache aching acorn acre across act acts add address admire adventure afar afraid
 after afternoon afterward afterwards again against age aged ago agree ah ahead
