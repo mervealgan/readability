@@ -88,10 +88,11 @@ def getmeasures(text, lang='en', merge=False):
 			if len(token) >= 7:
 				long_words += 1
 
-			if syll >= 3 and not token[0].isupper():  # ignore proper nouns
-				complex_words += 1
-			if token.lower() not in basicwords:
-				complex_words_dc += 1
+			if not token[0].isupper():  # ignore proper nouns
+				if syll >= 3:
+					complex_words += 1
+				if token.lower() not in basicwords:
+					complex_words_dc += 1
 
 		for name, regexp in wordusageregexps.items():
 			wordusage[name] += sum(1 for _ in regexp.finditer(text))
@@ -119,10 +120,11 @@ def getmeasures(text, lang='en', merge=False):
 				if len(token) >= 7:
 					long_words += 1
 
-				if syll >= 3 and not token[0].isupper():  # ignore proper nouns
-					complex_words += 1
-				if token.lower() not in basicwords:
-					complex_words_dc += 1
+				if not token[0].isupper():  # ignore proper nouns
+					if syll >= 3:
+						complex_words += 1
+					if token.lower() not in basicwords:
+						complex_words_dc += 1
 
 			for name, regexp in wordusageregexps.items():
 				wordusage[name] += sum(1 for _ in regexp.finditer(sent))
