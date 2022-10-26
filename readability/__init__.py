@@ -34,6 +34,7 @@ if sys.version[0] >= '3':
 WORDRE = re.compile(r"\b[-\w]+\b", re.UNICODE)
 PARARE = re.compile('\n\n+')
 SENTRE = re.compile('[^\n]+(\n|$)')
+DIRECTSPEECHRE = re.compile(r"^- .*$|(?:^|.* )['\"](?: .*|$)")
 
 
 def getmeasures(text, lang='en', merge=False):
@@ -59,6 +60,7 @@ def getmeasures(text, lang='en', merge=False):
 	long_words = 0
 	paragraphs = 0
 	sentences = 0
+	directspeech = 0
 	vocabulary = set()
 	syllcounter = LANGDATA[lang]['syllables']
 	wordusageregexps = LANGDATA[lang]['words']
@@ -76,7 +78,9 @@ def getmeasures(text, lang='en', merge=False):
 		# Collect surface characteristics from a string.
 		# NB: only recognizes UNIX newlines.
 		paragraphs = sum(1 for _ in PARARE.finditer(text)) + 1
-		sentences = sum(1 for _ in SENTRE.finditer(text))
+		for sent in SENTRE.finditer(text):
+			sentences += 1
+			directspeech += DIRECTSPEECHRE.search(sent) is not None
 		# paragraphs = text.count('\n\n')
 		# sentences = text.count('\n') - paragraphs
 		for token in WORDRE.findall(text):
@@ -111,6 +115,7 @@ def getmeasures(text, lang='en', merge=False):
 			prevempty = False
 
 			sentences += 1
+			directspeech += DIRECTSPEECHRE.search(sent) is not None
 			for token in WORDRE.findall(sent):
 				vocabulary.add(token)
 				words += 1
@@ -140,6 +145,7 @@ def getmeasures(text, lang='en', merge=False):
 			('words_per_sentence', words / sentences),
 			('sentences_per_paragraph', sentences / paragraphs),
 			('type_token_ratio', len(vocabulary) / words),
+			('directspeech_ratio', directspeech / sentences),
 			('characters', characters),
 			('syllables', syllables),
 			('words', words),
