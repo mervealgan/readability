@@ -2,7 +2,10 @@
 """Language specific data and functions."""
 
 from __future__ import unicode_literals
-import re
+try:
+	import re2 as re
+except ImportError:
+	import re
 import collections
 
 VOWELS = 'aoeuiäàâáåãëéèêóòöôõðùúüìíïî'  # y is special case; true for en.
