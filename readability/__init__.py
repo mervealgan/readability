@@ -24,6 +24,7 @@ except ImportError:
 	import re
 import sys
 import math
+import string
 import getopt
 import subprocess
 import collections
@@ -31,10 +32,40 @@ from readability.langdata import LANGDATA
 if sys.version[0] >= '3':
 	unicode = str  # pylint: disable=invalid-name,redefined-builtin
 
-WORDRE = re.compile(r"\b[-\w]+\b", re.UNICODE)
 PARARE = re.compile('\n\n+')
 SENTRE = re.compile('[^\n]+(\n|$)')
-DIRECTSPEECHRE = re.compile(r"^- .*$|(?:^|.* )['\"](?: .*|$)")
+PUNCTRE = re.compile("^[%s]+$" % re.escape(string.punctuation))
+
+# Match dashes at start of line, or any quotation mark used for direct speech
+# if used as separate token (rules out contractions, possessives, and hyphens
+# within words, given correct tokenization).
+DIRECTSPEECHRE = re.compile(
+		"^\\s*[-\u2012-\u2015\u2022\u2043].*$"  # dashes
+		"|(?:^| )['\"\u2018-\u201b\u2039\u203a\u02bc"  # single quotes
+		"\u201c-\u201f\u00ab\u00bb](?: |$)")  # double quotes
+# The following quotation marks are recognize.
+# dashes/bullet points:
+# U+2012 FIGURE DASH
+# U+2013 EN DASH
+# U+2014 EM DASH
+# U+2015 HORIZONTAL BAR
+# U+2022 BULLET
+# U+2043 HYPHEN BULLET
+
+# single/double quotes:
+# U+2018 left single quotation mark
+# U+2019 right single quotation mark
+# U+201A single low-9 quotation mark
+# U+201B single high-reversed-9 quotation mark
+# U+2039 single left-pointing angle quotation mark
+# U+203A single right-pointing angle quotation mark
+# U+02BC modifier letter apostrophe
+# U+201C left double quotation mark
+# U+201D right double quotation mark
+# U+201E double low-9 quotation mark
+# U+201F double high-reversed-9 quotation mark
+# U+00AB left-pointing double angle quotation mark
+# U+00BB right-pointing double angle quotation mark
 
 
 def getmeasures(text, lang='en', merge=False):
@@ -83,7 +114,9 @@ def getmeasures(text, lang='en', merge=False):
 			directspeech += DIRECTSPEECHRE.search(sent) is not None
 		# paragraphs = text.count('\n\n')
 		# sentences = text.count('\n') - paragraphs
-		for token in WORDRE.findall(text):
+		for token in text.split():
+			if PUNCTRE.match(token) is not None:
+				continue
 			vocabulary.add(token)
 			words += 1
 			characters += len(token)
@@ -117,7 +150,9 @@ def getmeasures(text, lang='en', merge=False):
 
 			sentences += 1
 			directspeech += DIRECTSPEECHRE.search(sent) is not None
-			for token in WORDRE.findall(sent):
+			for token in sent.split():
+				if PUNCTRE.match(token) is not None:
+					continue
 				vocabulary.add(token)
 				words += 1
 				characters += len(token)
