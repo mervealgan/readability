@@ -109,7 +109,7 @@ def getmeasures(text, lang='en', merge=False):
 		# Collect surface characteristics from a string.
 		# NB: only recognizes UNIX newlines.
 		paragraphs = sum(1 for _ in PARARE.finditer(text)) + 1
-		for sent in SENTRE.finditer(text):
+		for sent in SENTRE.findall(text):
 			sentences += 1
 			directspeech += DIRECTSPEECHRE.search(sent) is not None
 		# paragraphs = text.count('\n\n')
