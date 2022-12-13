@@ -20,8 +20,8 @@ original word list for English, but for Dutch and German lists of frequent
 words are used that were not specifically selected for recognizability by
 school children.
 
-NEW: for syntactic complexity measures,
-try [udstyle](https://gist.github.com/andreasvc/1fcdcbc2a21d31722facd98e5f02d19a/)
+For syntactic complexity measures, see
+`udstyle <https://github.com/andreasvc/udstyle>`_
 
 Installation
 ------------
