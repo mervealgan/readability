@@ -33,7 +33,7 @@ if sys.version[0] >= '3':
 	unicode = str  # pylint: disable=invalid-name,redefined-builtin
 
 PARARE = re.compile('\n\n+')
-SENTRE = re.compile('[^\n]+(\n|$)')
+SENTRE = re.compile('[^\n]+(?:\n|$)')
 PUNCTRE = re.compile("^[%s]+$" % re.escape(string.punctuation))
 
 # Match dashes at start of line, or any quotation mark used for direct speech
