@@ -9,6 +9,7 @@ except ImportError:
 import collections
 
 VOWELS = 'aoeuiäàâáåãëéèêóòöôõðùúüìíïî'  # y is special case; true for en.
+VOWELS_FR = VOWELS + 'yÿ'
 
 specialsyllables_en = """\
 tottered 2
@@ -158,6 +159,20 @@ def countsyllables_nlde(word):
 		result += 1
 	return result or 1
 
+
+def count_syllables_fr(word):
+	result = 0
+	prev_was_vowel = False
+	for char in word:
+		is_vowel = char in VOWELS_FR
+		if is_vowel and not prev_was_vowel:
+			result += 1
+		prev_was_vowel = is_vowel
+
+	if word.endswith('ent') and len(word) > 5:
+		result -= 1
+
+	return result
 
 conjuction_en = r'and|but|or|yet|nor'
 preposition_en = (
@@ -371,6 +386,73 @@ beginnings_de = collections.OrderedDict([
 		'(^|\\n)(%s)\\b' % preposition_de, re.IGNORECASE)),
 	])
 
+################################################################################
+# From french.txt https://github.com/frodonh/french-words
+# CON:c
+conjuction_fr = 'mais|alors|ou|et|donc|or|ni|car'  # add other conjonctions ?
+# PRE
+preposition_fr = ('afin d|afin de|après|attendu|au-dessus|aube|audit|auprès|autour|auxdites'
+				  '|auxdits|avant|avec|chez|compte-tenu|concernant|considérant|considéré|contre|d'
+				  '|d\'|dans|de|dedans|dehors|depuis|derrière|desdites|desdits|devant|devers|dont|dudit'
+				  '|durant|dès|en|endéans|entre|envers|excepté|fors|grâce|hormis|hors|jouxte|jusqu'
+				  '|jusqu\'au|jusqu\'à|jusque|jusques|lez|lès|malgré|moyennant|nonobstant|outre|par|par-dedans'
+				  '|par-delà|par-derrière|par-dessous|par-dessus|par-devant|par-devers|parmi|passé|pendant'
+				  '|plein|posé|pour|près|revoici|revoilà|rez|sans|sauf|selon|sinon|sitôt|sous|sous-prieur'
+				  '|suivant|supposé|sur|touchant|vers|versus|via|vis-à-vis|voici|voilà|vu|à|à l\'encontre'
+				  '|à l\'instar|â|ès|ôté')
+# PRO, PRO:dem, PRO:per, PRO:pos
+pronoun_fr = ('c|ce|ceci|cela|celle|celle-ci|celle-là|celles|celles-ci|celles-là|celles-là|celui|celui-ci'
+			  '|celui-ci|celui-là|celui-là|ceux|ceux-ci|ceux-ci|ceux-là|ceux-là|elle|elle-même|elles'
+			  '|elles-mêmes|en|eux|eux-mêmes|il|ils|j|je|l|la|le|les|leur|leurs|lui|lui-même|m|me|mes|mien'
+			  '|mienne|miennes|miens|moi|moi-même|mon|n\'|notre|nous|nous-même|nous-mêmes|nôtre|nôtres'
+			  '|on|quel|quelle|quelles|quelqu\'autre|quelqu\'un|quelque-une|quelques-unes|quelques-uns|quels'
+			  '|s|s\'|se|ses|sien|sienne|siennes|siens|soi|soi-même|t|t\'|te|tien|tienne|tiennes|tiens|toi'
+			  '|toi-même|tu|votre|vous|vous-même|vous-mêmes|vôtre|vôtres|y|ça')
+
+tobe_verb_fr = ('été|suis|es|est|sommes|êtes|sont'
+                '|étais|était|étions|étiez|étaient'
+                '|serai|seras|sera|serons|serez|seront'
+                '|serais|serait|serions|seriez|seraient'
+                '|sois|soit|soyons|soyez|soient'
+                '|fus|fut|fûmes|fûtes|furent'
+                '|fusse|fusses|fût|fussions|fussiez|fussent|étant|être')
+
+auxverb_fr = ("ai|as|a|avons|avez|ont|avais|avait|avions|aviez|avaient|aurai|auras|aura|aurons|aurez|auront"
+			  "|aurais|aurait|aurions|auriez|auraient|eus|eûmes|eûtes|eurent|aie|ayons|ayez|eusse|eusses|eût"
+			  "|eussions|eussiez|eussent|ayant|eu|avoir")
+
+words_fr = collections.OrderedDict([
+	('tobeverb', re.compile(
+		'\\b(%s)\\b' % tobe_verb_fr, re.IGNORECASE)),
+	('auxverb', re.compile(
+		'\\b(%s)\\b' % auxverb_fr, re.IGNORECASE)),
+	('conjunction', re.compile(
+		'\\b(%s)\\b' % conjuction_en, re.IGNORECASE)),
+	('pronoun', re.compile(
+		'\\b(%s)\\b' % pronoun_en, re.IGNORECASE)),
+	('preposition', re.compile(
+		'\\b(%s)\\b' % preposition_en, re.IGNORECASE)),
+	('nominalization', re.compile(
+		r'\b\w{2,}(tion|sion|ment|ence|ance|age|ure|ité|té|eur|euse|isme)\b', re.IGNORECASE | re.UNICODE)),
+])
+beginnings_fr = collections.OrderedDict([
+	('pronoun', re.compile(
+		'(^|\\n)(%s)\\b' % pronoun_fr, re.IGNORECASE)),
+	('interrogative', re.compile(
+		r'(^|\n)(pourquoi|qui|que|quoi|quand|où|comment)\b', re.IGNORECASE)),
+	('article', re.compile(
+		r'(^|\n)(le|la|les|l\'|un|une|des|du)\b', re.IGNORECASE)),
+	('subordination', re.compile(
+		r"(^|\n)(après que|parce que|de peur que|jusqu'à ce que|bien que|avant que"
+		r"|maintenant que|à moins que|comme|même si|pourvu que|jusqu'à ce que"
+		r"|comme si|même si|depuis que|tant que|afin que|chaque fois que"
+		r"|autant que|si|que|dès que|pour que|bien que|tandis que)\b", re.IGNORECASE)),
+	('conjunction', re.compile(
+		'(^|\\n)(%s)\\b' % conjuction_fr, re.IGNORECASE)),
+	('preposition', re.compile(
+		'(^|\\n)(%s)\\b' % preposition_fr, re.IGNORECASE)),
+])
+################################################################################
 # Long Dale-Chall word list of 3000 words recognized by 80 % of fifth graders
 basicwords_en = frozenset("""
 n't 'm 'll 'd 's 're 've
@@ -1002,20 +1084,83 @@ amerikanische sah gesamten einst verwendet vorbei Behörden helfen Folgen
 bezeichnet
 """.lower().split())
 
+# 1000 MFW french; http://www.lexique.org/shiny/openlexicon/ by freqfilms2
+basicwords_fr = frozenset("""je de est pas la tu le vous ne il et à un ça n' les on l' une d' pour a des en a qui ce 
+mais me ai nous dans elle du y t' bien plus non te mon au avec moi en va que est le l' oui ils se fait ce faire sur 
+toi sais veux ai s' ici rien était ma comme lui dit as si là cette votre es quand suis alors par peux son ton vais 
+très ou dire quoi où sont allez aussi voir fais si tout jamais pourquoi chose faut sa as suis ta les ces peut encore 
+est-ce que avez être mes la toujours ont tout été temps maintenant dis notre vas deux sans êtes vie vraiment viens 
+merci comment tous même peut-être vu crois quoi fois oh peu dois quelque père s' trop dieu chez bon aux monde aller 
+femme sûr tout homme que accord besoin ses aime parler voilà être ans veut tes vois déjà vrai avoir mère suis autre 
+eu avez quel pourquoi doit juste mieux étais vos jour où quelqu'un fille beaucoup regarde donc avait gens après 
+monsieur bonne comme personne ah petit maison bonjour comment nuit soir un voulez peur parce que faites es maman 
+ouais avant nom arrive nos passe bon pense argent quelle sont allons cet plaît cela vite appelle depuis fils laisse 
+moins attends sera air autre prendre seul arrête mal tête choses parle amour enfants toute tout hein prends jours 
+demain raison savoir elles connais voulais heure avais savez assez avoir moment sait donne avait problème combien 
+coup voiture partir eh fait ont trois tant merci ni tous pris avais entre mort même comprends travail venir pu dû 
+aider ami aujourd'hui toutes famille petite aurais pouvez vient était tard seule tuer passer hommes chercher trouvé 
+grand quelques chance tout idée trouver reste soit mort mal yeux sous contre pourrait pendant mois dites frère serait 
+rester sang venez part passé eux histoire heures sommes question fini avons eau longtemps gars demande porte hé 
+putain enfant main sortir trouve belle aurait vont beau type cas place seulement ville voici leur salut terre truc 
+police suite mettre enfin laissez matin chambre là-bas revoir regardez êtes tué papa entendu puis mari ensemble mec 
+juste amis importe peu côté corps celui autres madame parlé loin pourrais prie chaque venu train leurs laisser femmes 
+sens avons car savais devrais jeune ok mourir donné donner attendez excusez mis vers aimerais jouer coeur dernière 
+avant hier docteur merde genre dont vivre perdu feu écoute filles cause tiens mains demandé guerre façon envie plutôt 
+une espère pardon devrait devant ainsi manger affaire fin aucune merde sois reste salut arrivé pays ceux pensais 
+boulot souviens grande compris minutes première étaient école endroit film voudrais possible après font désolé peine 
+croire désolé appeler voulait voyez personne dirait vérité chef demander garçon suffit aura penses point années 
+affaires semaine étais bientôt tellement arriver instant voit presque fou gros dehors tomber vieux prend arrêter 
+partie attendre plaisir parents lit aucun droit tour d'abord prenez mot arrêtez attend bébé en fort qui aide fera 
+aimes nouveau prêt musique important essaie comment rentrer roi journée sinon entends faute reviens parti confiance 
+croyais numéro cinq vaut bonsoir dormir entrer sera attention chien mariage café attention jeu bureau sors service 
+heureux téléphone messieurs soeur super marche verre oublié facile lieu parfois route nouvelle croyez parles autant 
+mets pensé rentre voulu quatre cherche capitaine âge devez bras travaille payer pauvre pensez surtout an ira 
+travailler seigneur malade depuis puis premier ferai cul dur paix minute exactement appelé dès commence cours prison 
+veulent ciel boire partout ouvre rendre celle serai changer penser laissé occupe avis compte dernier drôle regarder 
+mauvais fête retour entendre état ok montrer souvent comprendre difficile faisait essayer pouvoir grave près gentil 
+fous sûrement d'autres peuvent ceci ordre allait esprit petit président perdre voix cher tôt année puis semble 
+problèmes ailleurs écrit voyons ensuite l'un faim rue pas honneur prix hôpital retard visage connaissez simple vieux 
+face oncle essayé allé garder joue pouvais photo patron impossible âme sûre adore bout appris parlez soleil propre 
+dollars sale aide général plan maître gueule donnez toute dix questions équipe rappelle changé autres sens six 
+bizarre tue cheveux allô lumière rapport bois acheter génial propos content étiez arme devons chemin inquiète tirer 
+amie choix petits sécurité livre morte médecin voyage excuse table dessus salle fallait pièce tiens libre ferais fond 
+or début monte pars sommes vue fric devait euh devenir lettre allais courant pieds sauf force pouvait sujet hôtel 
+tire bateau nouveau trucs sac camp armes personnes peuple avion silence restez pied revenir complètement derrière 
+calme espèce agit entrez semaines oublie mots plein cru télé jure doucement mange connaît tranquille honte sauver 
+colonel commencé soyez passé apprendre jolie situation erreur retrouver soit prochaine dos accident message meilleur 
+mer tenez rêve effet chérie envoie manque froid disais sorte désolée cadeau foutre bordel doute occuper oeil scène 
+finir compte carte pourtant appelez maintenant ait pareil joli soirée calme disait armée fasse garde premier chacun 
+coin con venue porte triste gagner commencer écoutez agent devenu décidé rendez-vous touche exemple debout faux 
+normal aimer puisse préfère groupe bon professeur gagné aille absolument intérieur habitude bien lire pouvoir avocat 
+met expliquer plein suppose heureuse connaître santé clair t disent mauvaise impression quitter millions pute sortez 
+bouche village diable loi auras autour serais ferait photos dame visite disparu enfer flics oublier existe faudra 
+monter livres grâce bouge mettez montre cheval doivent marcher pourra cuisine simplement ordres dîner vieille vue 
+folle écrire rends entre peau vraie dangereux ressemble su moi-même pire rend promis tenir rencontrer coucher forme 
+envoyé pourriez sort dirai coups continuer pleine compris lu pouvons nouvelles meurtre crime est mme seras selon a 
+secret paraît désolée sorti devais sérieux vin appel savait tourne partie anniversaire asseyez lieutenant mission 
+assieds rouge ferme ouvrir près déteste réponse long porter volé bruit frères aurai être magnifique d'autres verra 
+réussi terminé bonheur tient l celui-là morts ait raconte emmène rencontré sympa tais
+""".lower().split())
+################################################################################
 LANGDATA = dict(
-		en=dict(
-			syllables=countsyllables_en,
-			words=words_en,
-			beginnings=beginnings_en,
-			basicwords=basicwords_en),
-		nl=dict(
-			syllables=countsyllables_nlde,
-			words=words_nl,
-			beginnings=beginnings_nl,
-			basicwords=basicwords_nl),
-		de=dict(
-			syllables=countsyllables_nlde,
-			words=words_de,
-			beginnings=beginnings_de,
-			basicwords=basicwords_de),
-		)
+    en=dict(
+        syllables=countsyllables_en,
+        words=words_en,
+        beginnings=beginnings_en,
+        basicwords=basicwords_en),
+    nl=dict(
+        syllables=countsyllables_nlde,
+        words=words_nl,
+        beginnings=beginnings_nl,
+        basicwords=basicwords_nl),
+    de=dict(
+        syllables=countsyllables_nlde,
+        words=words_de,
+        beginnings=beginnings_de,
+        basicwords=basicwords_de),
+    fr=dict(
+        syllables=count_syllables_fr,
+        words=words_fr,
+        beginnings=beginnings_fr,
+        basicwords=basicwords_fr),
+)
