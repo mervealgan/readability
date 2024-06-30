@@ -204,6 +204,7 @@ def getmeasures(text, lang='en', merge=False):
 			('LIX', LIX(words, long_words, sentences)),
 			('SMOGIndex', SMOGIndex(complex_words, sentences)),
 			('RIX', RIX(long_words, sentences)),
+			('REL', REL_score(syllables, words, sentences)),
 		])
 	if basicwords:
 		stats['complex_words_dc'] = complex_words_dc
@@ -286,6 +287,10 @@ def DaleChallIndex(words, complex_words_dc, sentences):
 	if complex_prc <= 5:
 		score += 3.6365
 	return score
+
+
+def REL_score(syllables, words, sentences):
+	return 207 - 1.015 * (words / sentences) - 73.6 * (syllables / words)
 
 
 def main():
