@@ -205,6 +205,7 @@ def getmeasures(text, lang='en', merge=False):
 			('SMOGIndex', SMOGIndex(complex_words, sentences)),
 			('RIX', RIX(long_words, sentences)),
 			('REL', REL_score(syllables, words, sentences)),
+			('KandelMoles', KandelMoles(syllables, words, sentences)),
 		])
 	if basicwords:
 		stats['complex_words_dc'] = complex_words_dc
@@ -292,6 +293,9 @@ def DaleChallIndex(words, complex_words_dc, sentences):
 def REL_score(syllables, words, sentences):
 	return 207 - 1.015 * (words / sentences) - 73.6 * (syllables / words)
 
+
+def KandelMoles(syllables, words, sentences):
+	return 209 - 1.15 * (words / sentences) - 68 * (syllables / words)
 
 def main():
 	shortoptions = 'hL:'
