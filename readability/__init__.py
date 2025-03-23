@@ -88,6 +88,7 @@ def getmeasures(text, lang='en', merge=False):
 	syllables = 0
 	complex_words = 0
 	complex_words_dc = 0
+	complex_words_mes = 0 # Mesnager : To count complex words.
 	long_words = 0
 	paragraphs = 0
 	sentences = 0
@@ -131,6 +132,7 @@ def getmeasures(text, lang='en', merge=False):
 					complex_words += 1
 				if token.lower() not in basicwords:
 					complex_words_dc += 1
+					complex_words_mes += 1  # Mesnager : Mark word as complex if not in French basicwords list (string input).
 
 		for name, regexp in wordusageregexps.items():
 			wordusage[name] += sum(1 for _ in regexp.finditer(text))
@@ -167,6 +169,7 @@ def getmeasures(text, lang='en', merge=False):
 						complex_words += 1
 					if token.lower() not in basicwords:
 						complex_words_dc += 1
+						complex_words_mes += 1  # Mesnager: Mark word as complex if not in French basicwords list (iterable input).
 
 			for name, regexp in wordusageregexps.items():
 				wordusage[name] += sum(1 for _ in regexp.finditer(sent))
@@ -211,6 +214,12 @@ def getmeasures(text, lang='en', merge=False):
 		stats['complex_words_dc'] = complex_words_dc
 		readability['DaleChallIndex'] = DaleChallIndex(
 				words, complex_words_dc, sentences)
+
+		# Mesnager : Complex word count.
+		stats['complex_words_mes'] = complex_words_mes
+		readability['Mesnager'] = Mesnager(
+			complex_words_mes, words, sentences)
+
 	if merge:
 		readability.update(stats)
 		readability.update(wordusage)
@@ -296,6 +305,13 @@ def REL_score(syllables, words, sentences):
 
 def KandelMoles(syllables, words, sentences):
 	return 209 - 1.15 * (words / sentences) - 68 * (syllables / words)
+
+# Mesnager score for French readability
+# Source : François, T. (2011). An analysis of a French corpus for readability assessment.
+# Retrieved from https://cental.uclouvain.be/team/tfrancois/articles/Francois2011-thesis.pdf
+def Mesnager(complex_words_mes, words, sentences):
+    return (2 / 3) * (complex_words_mes / words) * 100 + (1 / 3) * words / sentences
+
 
 def main():
 	shortoptions = 'hL:'
