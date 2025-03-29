@@ -380,39 +380,66 @@ beginnings_de = collections.OrderedDict([
 	])
 
 ################################################################################
-# From french.txt https://github.com/frodonh/french-words
-# CON:c
-conjuction_fr = 'mais|alors|ou|et|donc|or|ni|car'  # add other conjonctions ?
-# PRE
-preposition_fr = ('afin d|afin de|après|attendu|au-dessus|aube|audit|auprès|autour|auxdites'
-				  '|auxdits|avant|avec|chez|compte-tenu|concernant|considérant|considéré|contre|d'
-				  '|d\'|dans|de|dedans|dehors|depuis|derrière|desdites|desdits|devant|devers|dont|dudit'
-				  '|durant|dès|en|endéans|entre|envers|excepté|fors|grâce|hormis|hors|jouxte|jusqu'
-				  '|jusqu\'au|jusqu\'à|jusque|jusques|lez|lès|malgré|moyennant|nonobstant|outre|par|par-dedans'
-				  '|par-delà|par-derrière|par-dessous|par-dessus|par-devant|par-devers|parmi|passé|pendant'
-				  '|plein|posé|pour|près|revoici|revoilà|rez|sans|sauf|selon|sinon|sitôt|sous|sous-prieur'
-				  '|suivant|supposé|sur|touchant|vers|versus|via|vis-à-vis|voici|voilà|vu|à|à l\'encontre'
-				  '|à l\'instar|â|ès|ôté')
-# PRO, PRO:dem, PRO:per, PRO:pos
-pronoun_fr = ('c|ce|ceci|cela|celle|celle-ci|celle-là|celles|celles-ci|celles-là|celles-là|celui|celui-ci'
-			  '|celui-ci|celui-là|celui-là|ceux|ceux-ci|ceux-ci|ceux-là|ceux-là|elle|elle-même|elles'
-			  '|elles-mêmes|en|eux|eux-mêmes|il|ils|j|je|l|la|le|les|leur|leurs|lui|lui-même|m|me|mes|mien'
-			  '|mienne|miennes|miens|moi|moi-même|mon|n\'|notre|nous|nous-même|nous-mêmes|nôtre|nôtres'
-			  '|on|quel|quelle|quelles|quelqu\'autre|quelqu\'un|quelque-une|quelques-unes|quelques-uns|quels'
-			  '|s|s\'|se|ses|sien|sienne|siennes|siens|soi|soi-même|t|t\'|te|tien|tienne|tiennes|tiens|toi'
-			  '|toi-même|tu|votre|vous|vous-même|vous-mêmes|vôtre|vôtres|y|ça')
+# French coordinating conjunctions
+# Source: Projet Voltaire – https://www.projet-voltaire.fr/dossier-voltaire/conjonctions-de-coordination/
+conjunction_fr = (
+	"mais|ou|et|donc|or|ni|car"
+)
 
-tobe_verb_fr = ('été|suis|es|est|sommes|êtes|sont'
-				'|étais|était|étions|étiez|étaient'
-				'|serai|seras|sera|serons|serez|seront'
-				'|serais|serait|serions|seriez|seraient'
-				'|sois|soit|soyons|soyez|soient'
-				'|fus|fut|fûmes|fûtes|furent'
-				'|fusse|fusses|fût|fussions|fussiez|fussent|étant|être')
+# French prepositions
+# Source: Lexique.org / Lexique383, sorted by 'freqlivres' (frequency in books).
+preposition_fr = (
+    "de|à|d'|en|dans|pour|sur|avec|par|sans"
+    "|sous|vers|entre|après|devant|chez|contre|avant|depuis|pendant"
+    "|derrière|voilà|près|dès|malgré|parmi|selon|voici|auprès|hors"
+    "|sauf|grâce|par-dessus|durant|plein|afin de|jusque|envers|vis-à-vis"
+    "|suivant|outre|concernant|par-delà|à l'instar|par-derrière|hormis"
+	"|via|moyennant|excepté|revoilà|nonobstant|devers|par-dessous"
+    "|par-devant|à l'encontre|revoici|par-devers|ès|dudit|jusqu'à"
+    "|audit|desdits|auxdits|desdites|jusqu'au"
+)
 
-auxverb_fr = ("ai|as|a|avons|avez|ont|avais|avait|avions|aviez|avaient|aurai|auras|aura|aurons|aurez|auront"
-			  "|aurais|aurait|aurions|auriez|auraient|eus|eûmes|eûtes|eurent|aie|ayons|ayez|eusse|eusses|eût"
-			  "|eussions|eussiez|eussent|ayant|eu|avoir")
+# French pronouns (personal, demonstrative, indefinite, relative, reflexive)
+# Source: Lexique.org / Lexique383, sorted by 'freqlivres' (frequency in books).
+pronoun_fr = (
+    "il|je|qui|elle|se|s'|on|me|lui|nous"
+    "|vous|y|que|ce|ils|l'|tu|ça|en|le"
+    "|moi|où|rien|les|la|dont|tout|t'|te|cela"
+    "|autre|elles|eux|toi|leur|quoi|autres|un|celui|personne"
+    "|ceux|celle|tous|l'un|lui-même|une|chacun|laquelle|lequel|quelqu'un"
+    "|elle-même|celles|moi-même|l'une|d'autres|soi|celui-ci|uns|celle-ci|celui-là"
+    "|même|ceci|aucun|eux-mêmes|auquel|lesquels|lesquelles|mienne|sienne"
+    "|mien|sien|chacune|certains|nul|siens|celle-là|aucune|ceux-là|soi-même"
+    "|toutes|auxquels|nôtre|la plupart|duquel|quelques-uns|nôtres|miens|ceux-ci"
+    "|auxquelles|unes|mêmes|vous-même|tel|nous-mêmes|elles-mêmes|plusieurs"
+    "|autrui|toi-même|vôtre"
+)
+# All forms of "to be" for French.
+# Source : Bescherelle https://conjugaison.bescherelle.com/verbes/etre
+tobe_verb_fr = (
+    "suis|es|est|sommes|êtes|sont"
+    "|étais|était|étions|étiez|étaient"
+    "|fus|fut|fûmes|fûtes|furent"
+    "|serai|seras|sera|serons|serez|seront"
+    "|serais|serait|serions|seriez|seraient"
+    "|sois|soit|soyons|soyez|soient"
+    "|fusse|fusses|fût|fussions|fussiez|fussent"
+    "|être|étant|été"
+)
+
+# French modal auxiliary verbs (pouvoir, devoir, vouloir, savoir) + falloir
+# Source : https://leconjugueur.lefigaro.fr/frlesauxiliaires.php
+auxverb_fr = (
+    "pouvoir|peux|peut|pouvons|pouvez|peuvent"
+	"|pouvais|pouvait|pouvions|pouviez|pouvaient"
+    "|devoir|dois|doit|devons|devez|doivent"
+	"|devais|devait|devions|deviez|devaient"
+    "|vouloir|veux|veut|voulons|voulez|veulent"
+	"|voulais|voulait|voulions|vouliez|voulaient"
+    "|savoir|sais|sait|savons|savez|savent"
+	"|savais|savait|savions|saviez|savaient"
+    "|falloir|faut|faudra|faudrait|fallait|fallu"
+)
 
 words_fr = collections.OrderedDict([
 	('tobeverb', re.compile(
@@ -420,18 +447,29 @@ words_fr = collections.OrderedDict([
 	('auxverb', re.compile(
 		'\\b(%s)\\b' % auxverb_fr, re.IGNORECASE)),
 	('conjunction', re.compile(
-		'\\b(%s)\\b' % conjuction_fr, re.IGNORECASE)),
+		'\\b(%s)\\b' % conjunction_fr, re.IGNORECASE)),
 	('pronoun', re.compile(
 		'\\b(%s)\\b' % pronoun_fr, re.IGNORECASE)),
 	('preposition', re.compile(
 		'\\b(%s)\\b' % preposition_fr, re.IGNORECASE)),
 	('nominalization', re.compile(
 		r'\b\w{2,}(tion|sion|ment|ence|ance|age|ure|ité|té|eur|euse|isme)\b', re.IGNORECASE | re.UNICODE)),
+
+	# French subordinating conjunctions
+	# Source: Projet Voltaire – https://www.projet-voltaire.fr/dossier-voltaire/conjonctions-de-subordination/
 	('subordination', re.compile(
-		r"\b(après que|parce que|parce qu’|parce qu'|de peur que|jusqu'à ce que|bien que|avant que"
-		r"|maintenant que|à moins que|comme|même si|pourvu que"
-		r"|comme si|depuis que|tant que|afin que|chaque fois que"
-		r"|autant que|si|que|dès que|pour que|tandis que)\b", re.IGNORECASE)),
+		r'\b(que|comme|lorsque|puisque|quand|si|'
+		r'à condition que|à mesure que|ainsi que|au cas où|d’autant que|'
+		r'pour que|afin que|c’est pourquoi|de sorte que|de peur que|'
+		r'parce que|étant donné que|du fait que|'
+		r'alors que|bien que|quoique|encore que|qui que|'
+		r'avant que|aussitôt que|tant que|'
+		r'de même que|plus que|moins que|'
+		r'à supposer que|dans la mesure où|'
+		r'sans que|selon que|'
+		r'au point que|tellement que)'
+		r'\b', re.IGNORECASE)),
+
 ])
 beginnings_fr = collections.OrderedDict([
 	('pronoun', re.compile(
@@ -441,7 +479,7 @@ beginnings_fr = collections.OrderedDict([
 	('article', re.compile(
 		r'(^|\n)(le|la|les|l\'|un|une|des|du)\b', re.IGNORECASE)),
 	('conjunction', re.compile(
-		'(^|\\n)(%s)\\b' % conjuction_fr, re.IGNORECASE)),
+		'(^|\\n)(%s)\\b' % conjunction_fr, re.IGNORECASE)),
 	('preposition', re.compile(
 		'(^|\\n)(%s)\\b' % preposition_fr, re.IGNORECASE)),
 ])
