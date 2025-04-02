@@ -441,6 +441,27 @@ auxverb_fr = (
     "|falloir|faut|faudra|faudrait|fallait|fallu"
 )
 
+# French subordinating conjunctions
+# Source: Projet Voltaire – https://www.projet-voltaire.fr/dossier-voltaire/conjonctions-de-subordination/
+subordination_fr = (
+	"comme|lorsque|puisque|quand|si"
+	"|à condition que|à mesure que|ainsi que|au cas où|d’autant que"
+    "|pour que|afin que|c’est pourquoi|de sorte que|de peur que"
+	"|parce\s+qu[’'e]?|étant donné que|du fait que"
+    "|alors que|bien que|quoique|encore que|qui que"
+    "|avant que|aussitôt que|tant que"
+	"|de même que|plus que|moins que"
+	"|à supposer que|dans la mesure où"
+	"|sans que|selon que"
+	"|au point que|tellement que|que"
+)
+
+# French articles
+# Source: Lexique.org / Lexique383
+article_fr = (
+    "le|la|les|l'|un|une|des|du|au|aux"
+)
+
 words_fr = collections.OrderedDict([
 	('tobeverb', re.compile(
 		'\\b(%s)\\b' % tobe_verb_fr, re.IGNORECASE)),
@@ -448,40 +469,21 @@ words_fr = collections.OrderedDict([
 		'\\b(%s)\\b' % auxverb_fr, re.IGNORECASE)),
 	('conjunction', re.compile(
 		'\\b(%s)\\b' % conjunction_fr, re.IGNORECASE)),
-	('pronoun', re.compile(
-		'\\b(%s)\\b' % pronoun_fr, re.IGNORECASE)),
 	('preposition', re.compile(
 		'\\b(%s)\\b' % preposition_fr, re.IGNORECASE)),
 	('nominalization', re.compile(
 		r'\b\w{2,}(tion|sion|ment|ence|ance|age|ure|ité|té|eur|euse|isme)\b', re.IGNORECASE | re.UNICODE)),
-
-	# French subordinating conjunctions
-	# Source: Projet Voltaire – https://www.projet-voltaire.fr/dossier-voltaire/conjonctions-de-subordination/
 	('subordination', re.compile(
-		r'\b(que|comme|lorsque|puisque|quand|si|'
-		r'à condition que|à mesure que|ainsi que|au cas où|d’autant que|'
-		r'pour que|afin que|c’est pourquoi|de sorte que|de peur que|'
-		r'parce que|étant donné que|du fait que|'
-		r'alors que|bien que|quoique|encore que|qui que|'
-		r'avant que|aussitôt que|tant que|'
-		r'de même que|plus que|moins que|'
-		r'à supposer que|dans la mesure où|'
-		r'sans que|selon que|'
-		r'au point que|tellement que)'
-		r'\b', re.IGNORECASE)),
-
+		'\\b(%s)\\b' % subordination_fr, re.IGNORECASE)),
+	('article', re.compile(
+		'\\b(%s)\\b' % article_fr, re.IGNORECASE)),
 ])
+
 beginnings_fr = collections.OrderedDict([
 	('pronoun', re.compile(
 		'(^|\\n)(%s)\\b' % pronoun_fr, re.IGNORECASE)),
 	('interrogative', re.compile(
 		r'(^|\n)(pourquoi|qui|que|quoi|quand|où|comment)\b', re.IGNORECASE)),
-	('article', re.compile(
-		r'(^|\n)(le|la|les|l\'|un|une|des|du)\b', re.IGNORECASE)),
-	('conjunction', re.compile(
-		'(^|\\n)(%s)\\b' % conjunction_fr, re.IGNORECASE)),
-	('preposition', re.compile(
-		'(^|\\n)(%s)\\b' % preposition_fr, re.IGNORECASE)),
 ])
 ################################################################################
 # Long Dale-Chall word list of 3000 words recognized by 80 % of fifth graders
